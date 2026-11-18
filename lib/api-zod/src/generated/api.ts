@@ -514,6 +514,61 @@ export const RenderVideoResponse = zod.unknown()
 
 
 /**
+ * @summary List MP4 renders saved by the current account
+ */
+export const ListDownloadedVideosResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "projectId": zod.string().uuid().nullable(),
+  "title": zod.string(),
+  "topic": zod.string(),
+  "aspectRatio": zod.enum(['16:9', '9:16']),
+  "durationSeconds": zod.number().int(),
+  "fileName": zod.string(),
+  "byteSize": zod.number().int(),
+  "createdAt": zod.coerce.date()
+})
+export const ListDownloadedVideosResponse = zod.array(ListDownloadedVideosResponseItem)
+
+
+/**
+ * @summary Download a saved MP4 render
+ */
+export const DownloadSavedVideoParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const DownloadSavedVideoResponse = zod.unknown()
+
+
+/**
+ * @summary Stream a saved MP4 for inline playback
+ */
+export const PreviewSavedVideoParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const PreviewSavedVideoResponse = zod.unknown()
+
+
+/**
+ * @summary Generate share captions and hashtags for saved video
+ */
+export const GenerateVideoShareCopyParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const GenerateVideoShareCopyResponse = zod.object({
+  "copies": zod.array(zod.object({
+  "platform": zod.enum(['youtube', 'instagram', 'tiktok']),
+  "title": zod.string(),
+  "caption": zod.string(),
+  "hashtags": zod.array(zod.string())
+})),
+  "trendNote": zod.string()
+})
+
+
+/**
  * @summary Show publishing provider setup and account status
  */
 export const ListSocialProvidersResponseItem = zod.object({

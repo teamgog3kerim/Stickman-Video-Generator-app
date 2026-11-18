@@ -7,6 +7,8 @@
  */
 
 export * from './adminUser';
+export * from './downloadedVideo';
+export * from './downloadedVideoAspectRatio';
 export * from './errorResponse';
 export * from './healthStatus';
 export * from './loginInput';
@@ -20,6 +22,8 @@ export * from './sessionUser';
 export * from './signUpInput';
 export * from './socialProviderStatus';
 export * from './socialProviderStatusProvider';
+export * from './socialSharePlatformCopy';
+export * from './socialSharePlatformCopyPlatform';
 export * from './storyboardDraft';
 export * from './storyboardGenerateInput';
 export * from './storyboardGenerateInputAspectRatio';
@@ -27,3 +31,4 @@ export * from './temporaryPassword';
 export * from './userRole';
 export * from './userRoleInput';
 export * from './videoRenderInput';
+export * from './videoShareCopyResponse';

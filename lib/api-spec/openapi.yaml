@@ -298,6 +298,109 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /videos/downloads:
+    get:
+      operationId: listDownloadedVideos
+      tags: [videos]
+      summary: List MP4 renders saved by the current account
+      responses:
+        "200":
+          description: Saved MP4 renders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DownloadedVideo"
+  /videos/downloads/{id}/file:
+    get:
+      operationId: downloadSavedVideo
+      tags: [videos]
+      summary: Download a saved MP4 render
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Saved MP4 file
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Saved video not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /videos/downloads/{id}/preview:
+    get:
+      operationId: previewSavedVideo
+      tags: [videos]
+      summary: Stream a saved MP4 for inline playback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Saved MP4 stream
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Saved video not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /videos/downloads/{id}/share-copy:
+    post:
+      operationId: generateVideoShareCopy
+      tags: [videos]
+      summary: Generate share captions and hashtags for saved video
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Platform-specific captions and hashtag suggestions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoShareCopyResponse"
+        "404":
+          description: Saved video not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Share copy generation limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Social copy generation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /social/providers:
     get:
       operationId: listSocialProviders
@@ -616,6 +719,57 @@ components:
           type: string
           format: uuid
       required: [projectId]
+    DownloadedVideo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: ["string", "null"]
+          format: uuid
+        title:
+          type: string
+        topic:
+          type: string
+        aspectRatio:
+          type: string
+          enum: ["16:9", "9:16"]
+        durationSeconds:
+          type: integer
+        fileName:
+          type: string
+        byteSize:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, projectId, title, topic, aspectRatio, durationSeconds, fileName, byteSize, createdAt]
+    SocialSharePlatformCopy:
+      type: object
+      properties:
+        platform:
+          type: string
+          enum: [youtube, instagram, tiktok]
+        title:
+          type: string
+        caption:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+      required: [platform, title, caption, hashtags]
+    VideoShareCopyResponse:
+      type: object
+      properties:
+        copies:
+          type: array
+          items:
+            $ref: "#/components/schemas/SocialSharePlatformCopy"
+        trendNote:
+          type: string
+      required: [copies, trendNote]
     SocialProviderStatus:
       type: object
       properties:

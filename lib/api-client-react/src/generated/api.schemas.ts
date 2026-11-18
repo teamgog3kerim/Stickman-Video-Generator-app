@@ -186,6 +186,48 @@ export interface VideoRenderInput {
   projectId: string;
 }
 
+export type DownloadedVideoAspectRatio = typeof DownloadedVideoAspectRatio[keyof typeof DownloadedVideoAspectRatio];
+
+
+export const DownloadedVideoAspectRatio = {
+  '16:9': '16:9',
+  '9:16': '9:16',
+} as const;
+
+export interface DownloadedVideo {
+  id: string;
+  /** @nullable */
+  projectId: string | null;
+  title: string;
+  topic: string;
+  aspectRatio: DownloadedVideoAspectRatio;
+  durationSeconds: number;
+  fileName: string;
+  byteSize: number;
+  createdAt: string;
+}
+
+export type SocialSharePlatformCopyPlatform = typeof SocialSharePlatformCopyPlatform[keyof typeof SocialSharePlatformCopyPlatform];
+
+
+export const SocialSharePlatformCopyPlatform = {
+  youtube: 'youtube',
+  instagram: 'instagram',
+  tiktok: 'tiktok',
+} as const;
+
+export interface SocialSharePlatformCopy {
+  platform: SocialSharePlatformCopyPlatform;
+  title: string;
+  caption: string;
+  hashtags: string[];
+}
+
+export interface VideoShareCopyResponse {
+  copies: SocialSharePlatformCopy[];
+  trendNote: string;
+}
+
 export type SocialProviderStatusProvider = typeof SocialProviderStatusProvider[keyof typeof SocialProviderStatusProvider];
 
 

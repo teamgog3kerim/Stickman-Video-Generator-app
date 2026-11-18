@@ -21,6 +21,7 @@ import type {
 
 import type {
   AdminUser,
+  DownloadedVideo,
   ErrorResponse,
   HealthStatus,
   LoginInput,
@@ -34,7 +35,8 @@ import type {
   StoryboardGenerateInput,
   TemporaryPassword,
   UserRoleInput,
-  VideoRenderInput
+  VideoRenderInput,
+  VideoShareCopyResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1133,6 +1135,311 @@ export const useRenderVideo = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getRenderVideoMutationOptions(options));
+    }
+
+export const getListDownloadedVideosUrl = () => {
+
+
+
+
+  return `/api/videos/downloads`
+}
+
+/**
+ * @summary List MP4 renders saved by the current account
+ */
+export const listDownloadedVideos = async ( options?: Parameters<typeof customFetch>[1]): Promise<DownloadedVideo[]> => {
+
+  return customFetch<DownloadedVideo[]>(getListDownloadedVideosUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListDownloadedVideosQueryKey = () => {
+    return [
+    `/api/videos/downloads`
+    ] as const;
+    }
+
+
+export const getListDownloadedVideosQueryOptions = <TData = Awaited<ReturnType<typeof listDownloadedVideos>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDownloadedVideos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDownloadedVideosQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDownloadedVideos>>> = ({ signal }) => listDownloadedVideos({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDownloadedVideos>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListDownloadedVideosQueryResult = NonNullable<Awaited<ReturnType<typeof listDownloadedVideos>>>
+export type ListDownloadedVideosQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List MP4 renders saved by the current account
+ */
+
+export function useListDownloadedVideos<TData = Awaited<ReturnType<typeof listDownloadedVideos>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDownloadedVideos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListDownloadedVideosQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDownloadSavedVideoUrl = (id: string,) => {
+
+
+
+
+  return `/api/videos/downloads/${id}/file`
+}
+
+/**
+ * @summary Download a saved MP4 render
+ */
+export const downloadSavedVideo = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getDownloadSavedVideoUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownloadSavedVideoQueryKey = (id: string,) => {
+    return [
+    `/api/videos/downloads/${id}/file`
+    ] as const;
+    }
+
+
+export const getDownloadSavedVideoQueryOptions = <TData = Awaited<ReturnType<typeof downloadSavedVideo>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadSavedVideo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadSavedVideoQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadSavedVideo>>> = ({ signal }) => downloadSavedVideo(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadSavedVideo>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type DownloadSavedVideoQueryResult = NonNullable<Awaited<ReturnType<typeof downloadSavedVideo>>>
+export type DownloadSavedVideoQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Download a saved MP4 render
+ */
+
+export function useDownloadSavedVideo<TData = Awaited<ReturnType<typeof downloadSavedVideo>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadSavedVideo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getDownloadSavedVideoQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPreviewSavedVideoUrl = (id: string,) => {
+
+
+
+
+  return `/api/videos/downloads/${id}/preview`
+}
+
+/**
+ * @summary Stream a saved MP4 for inline playback
+ */
+export const previewSavedVideo = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getPreviewSavedVideoUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPreviewSavedVideoQueryKey = (id: string,) => {
+    return [
+    `/api/videos/downloads/${id}/preview`
+    ] as const;
+    }
+
+
+export const getPreviewSavedVideoQueryOptions = <TData = Awaited<ReturnType<typeof previewSavedVideo>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewSavedVideo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreviewSavedVideoQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof previewSavedVideo>>> = ({ signal }) => previewSavedVideo(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof previewSavedVideo>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PreviewSavedVideoQueryResult = NonNullable<Awaited<ReturnType<typeof previewSavedVideo>>>
+export type PreviewSavedVideoQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Stream a saved MP4 for inline playback
+ */
+
+export function usePreviewSavedVideo<TData = Awaited<ReturnType<typeof previewSavedVideo>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewSavedVideo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPreviewSavedVideoQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGenerateVideoShareCopyUrl = (id: string,) => {
+
+
+
+
+  return `/api/videos/downloads/${id}/share-copy`
+}
+
+/**
+ * @summary Generate share captions and hashtags for saved video
+ */
+export const generateVideoShareCopy = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<VideoShareCopyResponse> => {
+
+  return customFetch<VideoShareCopyResponse>(getGenerateVideoShareCopyUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getGenerateVideoShareCopyMutationKey = () => ['generateVideoShareCopy'] as const;
+
+export const getGenerateVideoShareCopyMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateVideoShareCopy>>, TError,GenerateVideoShareCopyMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateVideoShareCopy>>, TError,GenerateVideoShareCopyMutationVariables, TContext> => {
+
+const mutationKey = getGenerateVideoShareCopyMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateVideoShareCopy>>, GenerateVideoShareCopyMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  generateVideoShareCopy(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateVideoShareCopyMutationResult = NonNullable<Awaited<ReturnType<typeof generateVideoShareCopy>>>
+
+    export type GenerateVideoShareCopyMutationError = ErrorType<ErrorResponse>
+    export type GenerateVideoShareCopyMutationVariables = {id: string}
+
+    /**
+ * @summary Generate share captions and hashtags for saved video
+ */
+export const useGenerateVideoShareCopy = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateVideoShareCopy>>, TError,GenerateVideoShareCopyMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateVideoShareCopy>>,
+        TError,
+        GenerateVideoShareCopyMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGenerateVideoShareCopyMutationOptions(options));
     }
 
 export const getListSocialProvidersUrl = () => {

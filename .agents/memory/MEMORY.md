@@ -1,0 +1,1 @@
+- [OAuth restriction](no-oauth-scope.md) — The user asked for no OAuth anywhere in this app; social sharing should stay guided/manual.

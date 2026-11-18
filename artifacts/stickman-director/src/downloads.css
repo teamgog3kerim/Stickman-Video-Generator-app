@@ -1,0 +1,37 @@
+.downloads-storage-note{display:flex;align-items:center;gap:6px;color:#748176;font-size:10px}
+.downloads-storage-note svg{color:#719078}
+.download-list{display:grid;gap:11px}
+.download-card{display:grid;grid-template-columns:205px minmax(0,1fr);min-height:155px;overflow:hidden;border:1px solid #e0dcd2;border-radius:10px;background:#faf8f2;transition:transform .18s,border-color .18s}
+.download-card:hover{transform:translateY(-1px);border-color:#d5b8a5}
+.download-art{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 72% 28%,#53766b 0 8%,transparent 8.5%),linear-gradient(140deg,#35494b,#202e34);color:#e9e3d5}
+.download-art:before{content:'';position:absolute;inset:0;background:linear-gradient(160deg,transparent 48%,#1c2727 49% 100%);opacity:.48}
+.download-art.portrait{background:radial-gradient(circle at 52% 35%,#d7845c 0 9%,transparent 9.5%),linear-gradient(145deg,#35484a,#253438 60%,#637864)}
+.download-art svg{position:relative;z-index:1;opacity:.9}
+.download-art-index,.download-format{position:absolute;z-index:2;color:#e8e2d6;font-size:8px;letter-spacing:.08em}
+.download-art-index{left:12px;top:12px}
+.download-format{right:11px;bottom:10px;padding:4px 6px;border:1px solid #ffffff70;border-radius:4px}
+.download-details{display:flex;flex-direction:column;min-width:0;padding:14px 17px 11px}
+.download-details-top{display:flex;justify-content:space-between;gap:10px;color:#99968c;font-size:8px;letter-spacing:.06em}
+.download-details h2{overflow:hidden;margin:9px 0 3px;color:#303c43;font:600 18px 'Space Grotesk';letter-spacing:-.03em;text-overflow:ellipsis;white-space:nowrap}
+.download-topic{overflow:hidden;margin:0;color:#858980;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.download-card-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:10px;border-top:1px solid #eeeae1;color:#9b998f;font-size:8px}
+.download-card-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.download-again{flex:none;padding:8px 10px;font-size:9px;text-decoration:none}
+.view-share-button{flex:none;padding:8px 10px;font-size:9px}
+.download-empty-icon{display:grid;place-items:center;width:53px;height:53px;margin-bottom:13px;border:1px solid #ddd3c4;border-radius:10px;background:#f0ede4;color:#7d9383}
+.downloads-empty p{max-width:390px}
+@media(max-width:620px){
+  .downloads-storage-note{font-size:9px}
+  .download-card{grid-template-columns:105px minmax(0,1fr);min-height:142px}
+  .download-details{padding:10px 9px 8px}
+  .download-details-top{font-size:7px}
+  .download-details h2{font-size:13px;margin-top:8px}
+  .download-topic{font-size:8px}
+  .download-card-foot{gap:5px;padding-top:7px}
+  .download-card-foot>.mono{display:none}
+  .download-card-actions{gap:5px}
+  .download-again{padding:7px 8px;font-size:8px}
+  .download-again svg{width:12px;height:12px}
+  .view-share-button{padding:7px 8px;font-size:8px}
+  .view-share-button svg{width:12px;height:12px}
+}
