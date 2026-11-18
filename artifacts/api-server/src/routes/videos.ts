@@ -34,11 +34,17 @@ router.post("/videos/render", async (req, res): Promise<void> => {
     return;
   }
 
-  const narrationLength = project.scenes.reduce(
-    (total, scene) => total + scene.narration.length,
-    0,
-  );
-  if (project.voiceover && narrationLength > 6000) {
+  const narration = project.scenes
+    .map((scene) => scene.narration.trim())
+    .filter(Boolean)
+    .join("\n\n");
+  if (project.voiceover && !narration) {
+    res.status(400).json({
+      error: "Add narration to at least one scene or turn voiceover off before rendering.",
+    });
+    return;
+  }
+  if (project.voiceover && narration.length > 6000) {
     res.status(400).json({
       error: "Voiceover is limited to 6,000 characters per render. Shorten the narration or turn voiceover off.",
     });
