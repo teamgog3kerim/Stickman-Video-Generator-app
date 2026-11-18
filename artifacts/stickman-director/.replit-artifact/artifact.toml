@@ -1,5 +1,5 @@
 kind = "web"
-previewPath = "/stickman-director/"
+previewPath = "/"
 title = "Stickman Video Director"
 description = "A focused video-planning workspace for turning an idea into a stickman explainer storyboard. Choose a creation engine and style, shape scenes, and export a production-ready brief."
 version = "1.0.0"
@@ -8,7 +8,7 @@ router = "path"
 
 [[services]]
 name = "web"
-paths = [ "/stickman-director/" ]
+paths = [ "/" ]
 localPort = 23363
 
 [services.development]
@@ -25,4 +25,4 @@ to = "/index.html"
 
 [services.env]
 PORT = "23363"
-BASE_PATH = "/stickman-director/"
+BASE_PATH = "/"
