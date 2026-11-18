@@ -88,22 +88,29 @@ function wrapText(value: string, maxChars: number, maxLines: number): string[] {
   return lines.length ? lines : [""];
 }
 
-function contextForScene(scene: RenderScene, topic: string): SceneContext {
+function contextForScene(scene: RenderScene, topic: string, styleId: string): SceneContext {
   const classify = (text: string): SceneContext | null => {
     const value = text.toLowerCase();
     const has = (terms: string[]) => terms.some((term) => value.includes(term));
+    if (/\b(classroom|teacher|student|school|chalkboard|lesson)\b/.test(value) || has(["ትምህርት ቤት", "ተማሪ", "መምህር", "ጥቁር ሰሌዳ", "ክፍል", "مدرسة", "معلم", "طالب", "سبورة", "درس"])) return "classroom";
+    if (/\b(mall|shopping|shop|store|food court|marketplace)\b/.test(value) || has(["የገበያ ማዕከል", "ሱቅ", "ግብይት", "የምግብ ማዕከል", "مركز تجاري", "متجر", "تسوق", "سوق تجاري", "مطاعم"])) return "mall";
+    if (/\b(home|house|family|living room|kitchen|bedroom)\b/.test(value) || has(["ቤት", "ቤተሰብ", "ሳሎን", "መኝታ ቤት", "منزل", "بيت", "عائلة", "أسرة", "غرفة المعيشة", "مطبخ"])) return "home";
+    if (/\b(office|workplace|work meeting|interview studio|newsroom)\b/.test(value) || has(["ቢሮ", "የሥራ ቦታ", "ቃለ መጠይቅ", "مكتب", "مكان العمل", "مقابلة", "استوديو أخبار"])) return "office";
+    if (/\b(park|playground|garden path)\b/.test(value) || has(["መናፈሻ", "የልጆች መጫወቻ", "حديقة عامة", "ملعب أطفال"])) return "park";
     if (/\b(technology|phone|app|computer|code|digital|internet|battery|ai|software|robot|data)\b/.test(value) || has(["ስልክ", "ቴክኖሎጂ", "ኮምፒውተር", "ኮድ", "ዲጂታል", "ኢንተርኔት", "ባትሪ", "ሶፍትዌር", "ሮቦት", "መረጃ", "هاتف", "تقنية", "تكنولوجيا", "حاسوب", "برمجة", "رقمي", "إنترنت", "بطارية", "ذكاء اصطناعي", "برنامج", "روبوت", "بيانات"])) return "technology";
     if (/\b(tree|forest|plant|garden|climate|nature|ocean|river|earth|weather|solar|renewable|wind|energy)\b/.test(value) || has(["ዛፍ", "ደን", "ተክል", "አትክልት", "የአየር ንብረት", "ተፈጥሮ", "ውቅያኖስ", "ወንዝ", "ምድር", "የአየር ሁኔታ", "ፀሐይ", "ንፋስ", "ኃይል", "شجرة", "غابة", "نبات", "حديقة", "مناخ", "طبيعة", "محيط", "نهر", "أرض", "طقس", "طاقة", "رياح"])) return "nature";
     if (/\b(money|budget|bank|finance|price|cost|invest|saving|debt|profit|market|econom)\b/.test(value) || has(["ገንዘብ", "በጀት", "ባንክ", "ፋይናንስ", "ዋጋ", "ወጪ", "ኢንቨስት", "ቁጠባ", "ዕዳ", "ትርፍ", "ገበያ", "ኢኮኖሚ", "مال", "ميزانية", "بنك", "تمويل", "سعر", "تكلفة", "استثمار", "ادخار", "دين", "ربح", "سوق", "اقتصاد"])) return "finance";
     if (/\b(science|atom|physics|experiment|space|planet|molecule|research|gravity|chemistry)\b/.test(value) || has(["ሳይንስ", "አቶም", "ፊዚክስ", "ሙከራ", "ጠፈር", "ፕላኔት", "ሞለኪውል", "ምርምር", "ስበት", "ኬሚስትሪ", "علوم", "ذرة", "فيزياء", "تجربة", "فضاء", "كوكب", "جزيء", "بحث", "جاذبية", "كيمياء"])) return "science";
     if (/\b(health|heart|doctor|medical|exercise|fitness|sleep|brain|body|wellness)\b/.test(value) || has(["ጤና", "ልብ", "ሐኪም", "ሕክምና", "እንቅስቃሴ", "የአካል ብቃት", "እንቅልፍ", "አንጎል", "ሰውነት", "ደህንነት", "صحة", "قلب", "طبيب", "طبي", "تمرين", "لياقة", "نوم", "دماغ", "جسم", "عافية"])) return "health";
-    if (/\b(learn|learning|school|student|teacher|study|education|book|class|memory|skill)\b/.test(value) || has(["መማር", "ትምህርት ቤት", "ተማሪ", "መምህር", "ጥናት", "ትምህርት", "መጽሐፍ", "ክፍል", "ትውስታ", "ክህሎት", "تعلم", "مدرسة", "طالب", "معلم", "دراسة", "تعليم", "كتاب", "صف", "ذاكرة", "مهارة"])) return "learning";
+    if (/\b(learn|learning|study|education|book|memory|skill)\b/.test(value) || has(["መማር", "ጥናት", "ትምህርት", "መጽሐፍ", "ትውስታ", "ክህሎት", "تعلم", "دراسة", "تعليم", "كتاب", "ذاكرة", "مهارة"])) return "learning";
     if (/\b(food|cook|recipe|kitchen|meal|bread|fruit|nutrition|restaurant)\b/.test(value) || has(["ምግብ", "ማብሰል", "የምግብ አሰራር", "ወጥ ቤት", "ምሳ", "ዳቦ", "ፍራፍሬ", "አመጋገብ", "ምግብ ቤት", "طعام", "طبخ", "وصفة", "مطبخ", "وجبة", "خبز", "فاكهة", "تغذية", "مطعم"])) return "food";
     if (/\b(city|travel|journey|road|transport|train|bus|street|building|community)\b/.test(value) || has(["ከተማ", "ጉዞ", "መንገድ", "ትራንስፖርት", "ባቡር", "አውቶቡስ", "ጎዳና", "ሕንፃ", "ማኅበረሰብ", "مدينة", "سفر", "رحلة", "طريق", "نقل", "قطار", "حافلة", "شارع", "مبنى", "مجتمع"])) return "city";
     return null;
   };
   const sceneText = `${scene.title} ${scene.narration} ${scene.visualDirection} ${scene.visualMetaphor ?? ""}`;
-  return classify(sceneText) ?? classify(topic) ?? "studio";
+  if (styleId === "A8") return "classroom";
+  if (styleId === "B9") return "city";
+  return classify(sceneText) ?? classify(topic) ?? (styleId === "A9" ? "home" : styleId === "B8" ? "park" : "studio");
 }
 
 function actionForScene(scene: RenderScene): StickmanAction {
@@ -124,6 +131,7 @@ function sceneEnvironment(
   index: number,
   width: number,
   height: number,
+  language: RenderInput["contentLanguage"],
 ): string {
   const ink = palette.ink;
   const accent = palette.accent;
@@ -131,6 +139,7 @@ function sceneEnvironment(
   const horizon = Math.round(height * 0.58);
   const shift = (index % 3) * 30;
   const line = `fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".19"`;
+  const saleLabel = language === "am" ? "ሽያጭ" : language === "ar" ? "تخفيضات" : "SALE";
 
   switch (context) {
     case "nature":
@@ -149,6 +158,16 @@ function sceneEnvironment(
       return `<g ${line}><ellipse cx="${width * .73}" cy="${horizon - 35}" rx="136" ry="53" fill="${paper}" stroke="${ink}" stroke-width="8"/><ellipse cx="${width * .73}" cy="${horizon - 41}" rx="92" ry="29" stroke="${accent}" stroke-width="7"/><circle cx="${width * .69}" cy="${horizon - 42}" r="15" fill="${accent}" stroke="${accent}"/><circle cx="${width * .78}" cy="${horizon - 46}" r="13" fill="${palette.field}" stroke="${ink}"/><path d="M${width * .22} ${horizon - 124} q-21 -34 0 -61 m42 61 q-21 -34 0 -61" ${line}/></g>`;
     case "city":
       return `<g ${line}><path d="M0 ${horizon + 6} V${horizon - 118} h${width * .13} v124 M${width * .16} ${horizon + 6} V${horizon - 197} h${width * .15} v203 M${width * .35} ${horizon + 6} V${horizon - 144} h${width * .13} v150 M${width * .53} ${horizon + 6} V${horizon - 172} h${width * .12} v178 M${width * .72} ${horizon + 6} V${horizon - 120} h${width * .13} v126 M${width * .9} ${horizon + 6} V${horizon - 188} h${width * .1} v194"/><path d="M0 ${horizon + 14} Q${width * .5} ${horizon - 30} ${width} ${horizon + 12}" stroke="${accent}" stroke-width="9"/></g>`;
+    case "classroom":
+      return `<g fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><rect x="${width * .07}" y="${horizon - 165}" width="${width * .34}" height="145" rx="8" fill="${palette.field}"/><path d="M${width * .105} ${horizon - 126} h${width * .22} M${width * .105} ${horizon - 89} h${width * .15} M${width * .105} ${horizon - 52} h${width * .19}" stroke="${paper}" stroke-width="7"/><rect x="${width * .68}" y="${horizon - 173}" width="${width * .22}" height="126" rx="5" fill="${paper}"/><path d="M${width * .79} ${horizon - 170} v120 M${width * .68} ${horizon - 110} h${width * .22}" stroke="${palette.field}" stroke-width="6"/><path d="M${width * .43} ${horizon + 34} h${width * .18} m-${width * .15} 0 v52 m${width * .12} -52 v52 M${width * .7} ${horizon + 28} h${width * .17} m-${width * .14} 0 v56 m${width * .12} -56 v56" stroke="${accent}" stroke-width="9"/></g>`;
+    case "mall":
+      return `<g fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M0 ${horizon - 170} H${width} M${width * .08} ${horizon - 155} H${width * .92} V${horizon + 8} H${width * .08} Z" fill="${paper}"/><path d="M${width * .08} ${horizon - 105} H${width * .92}" stroke="${accent}" stroke-width="24"/><text x="${width * .5}" y="${horizon - 96}" text-anchor="middle" fill="${paper}" stroke="none" font-size="${language === "am" || language === "ar" ? 19 : 25}" font-weight="900" font-family="${languageFont(language)}, sans-serif">${escapeXml(saleLabel)}</text><path d="M${width * .15} ${horizon - 62} h${width * .2} v68 h-${width * .2}z M${width * .42} ${horizon - 62} h${width * .2} v68 h-${width * .2}z M${width * .69} ${horizon - 62} h${width * .16} v68 h-${width * .16}z" fill="${palette.field}" stroke="${ink}" stroke-width="6"/><path d="M${width * .24} ${horizon - 42} v37 m${width * .38} -37 v37 m${width * .17} -37 v37" stroke="${paper}" stroke-width="6"/></g>`;
+    case "home":
+      return `<g fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><rect x="${width * .1}" y="${horizon - 170}" width="${width * .24}" height="128" rx="4" fill="${paper}"/><path d="M${width * .22} ${horizon - 168} v124 M${width * .1} ${horizon - 106} h${width * .24}" stroke="${palette.field}" stroke-width="6"/><path d="M${width * .52} ${horizon - 36} q${width * .04} -55 ${width * .12} -55 h${width * .13} q${width * .06} 0 ${width * .08} 55 v43 H${width * .52}Z" fill="${palette.field}" stroke="${ink}" stroke-width="8"/><path d="M${width * .49} ${horizon + 4} h${width * .39} M${width * .56} ${horizon + 6} v47 M${width * .81} ${horizon + 6} v47" stroke="${accent}" stroke-width="8"/><circle cx="${width * .68}" cy="${horizon - 96}" r="28" fill="${accent}" opacity=".75"/></g>`;
+    case "office":
+      return `<g fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><rect x="${width * .64}" y="${horizon - 169}" width="${width * .26}" height="132" rx="5" fill="${paper}"/><path d="M${width * .77} ${horizon - 166} v126 M${width * .65} ${horizon - 104} h${width * .24}" stroke="${palette.field}" stroke-width="6"/><path d="M${width * .12} ${horizon - 14} h${width * .4} l${width * .05} 18 H${width * .08}Z M${width * .18} ${horizon + 4} v51 m${width * .31} -51 v51" fill="${paper}"/><rect x="${width * .23}" y="${horizon - 89}" width="${width * .17}" height="72" rx="6" fill="${palette.field}" stroke="${accent}" stroke-width="7"/><path d="M${width * .275} ${horizon - 46} h${width * .08} M${width * .315} ${horizon - 85} v38" stroke="${ink}" stroke-width="5"/></g>`;
+    case "park":
+      return `<g fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M0 ${horizon + 22} Q${width * .45} ${horizon - 60} ${width} ${horizon + 10} V${height} H0Z" fill="${palette.field}" stroke="none" opacity=".85"/><path d="M${width * .16} ${horizon + 14} v-105 m0 41 -45 -35 m45 60 43 -44 M${width * .82} ${horizon + 6} v-132 m0 48 -51 -37 m51 66 47 -49" stroke="${ink}" stroke-width="10"/><circle cx="${width * .16}" cy="${horizon - 106}" r="53" fill="${accent}" stroke="${ink}" stroke-width="5" opacity=".9"/><circle cx="${width * .82}" cy="${horizon - 128}" r="61" fill="${accent}" stroke="${ink}" stroke-width="5" opacity=".85"/><path d="M${width * .37} ${horizon + 6} h${width * .25} m-${width * .21} 0 v30 m${width * .17} -30 v30" stroke="${ink}" stroke-width="8"/></g>`;
     default:
       return `<g ${line}><rect x="${width * .09}" y="${horizon - 145}" width="${width * .3}" height="166" rx="12" fill="${paper}" stroke="${accent}" stroke-width="8"/><path d="M${width * .16} ${horizon - 95} h${width * .16} M${width * .16} ${horizon - 56} h${width * .13} M${width * .16} ${horizon - 17} h${width * .17} M${width * .55} ${horizon + 12} v-89 q74 -80 148 0 v89" /></g>`;
   }
@@ -158,6 +177,75 @@ function languageFont(language: RenderInput["contentLanguage"]): string {
   if (language === "am") return "Noto Sans Ethiopic";
   if (language === "ar") return "Noto Naskh Arabic";
   return "DejaVu Sans";
+}
+
+type CartoonAction = StickmanAction | "react" | "talk" | "listen";
+
+function cartoonCharacter(
+  x: number,
+  groundY: number,
+  scale: number,
+  shirt: string,
+  skin: string,
+  palette: (typeof STYLE_PALETTES)[string],
+  phase: number,
+  action: CartoonAction,
+  characterIndex: number,
+  styleId: string,
+): string {
+  const cycle = Math.sin(phase * Math.PI * 2 + characterIndex * 1.7);
+  const bounce = action === "react" || action === "celebrate" ? Math.max(0, cycle) * 11 : action === "run" ? Math.abs(cycle) * 7 : cycle * 2;
+  const swing = cycle * (action === "run" ? 30 : 19);
+  const leftArm = action === "react" || action === "celebrate"
+    ? { elbowX: -38, elbowY: -46 - Math.abs(cycle) * 8, handX: -51, handY: -83 - Math.abs(cycle) * 8 }
+    : action === "think" || action === "listen"
+      ? { elbowX: -31, elbowY: -5, handX: -9, handY: -38 }
+      : action === "walk" || action === "run"
+        ? { elbowX: -35 - swing * .3, elbowY: -8, handX: -21 - swing, handY: 20 }
+        : { elbowX: -43, elbowY: -15, handX: -59, handY: -43 };
+  const rightArm = action === "react" || action === "celebrate"
+    ? { elbowX: 38, elbowY: -46 - Math.abs(cycle) * 8, handX: 51, handY: -83 - Math.abs(cycle) * 8 }
+    : action === "wave"
+      ? { elbowX: 42, elbowY: -50, handX: 58 + cycle * 9, handY: -94 + Math.abs(cycle) * 6 }
+      : action === "walk" || action === "run"
+        ? { elbowX: 35 + swing * .3, elbowY: -10, handX: 21 + swing, handY: 19 }
+        : { elbowX: 42, elbowY: -34, handX: 63, handY: -64 + cycle * 7 };
+  const walking = action === "walk" || action === "run";
+  const stride = walking ? swing * .8 : 0;
+  const blink = Math.sin(phase * Math.PI * 4 + characterIndex * 2.4) > .97;
+  const mouthOpen = (action === "talk" || action === "present" || characterIndex === 0) && Math.sin(phase * Math.PI * 4 + characterIndex) > .15;
+  const mouth = mouthOpen
+    ? `<ellipse cx="0" cy="-66" rx="7" ry="9" fill="${palette.ink}"/><ellipse cx="0" cy="-63" rx="3" ry="2" fill="${palette.accent}"/>`
+    : `<path d="M-10 -68 Q0 -58 10 -68" fill="none" stroke="${palette.ink}" stroke-width="4" stroke-linecap="round"/>`;
+  const hair = characterIndex === 0
+    ? `<path d="M-35 -91 Q-42 -122 -12 -123 Q8 -137 30 -116 Q42 -104 34 -87 Q17 -99 5 -107 Q-9 -91 -35 -91Z" fill="${palette.ink}"/>`
+    : characterIndex === 1
+      ? `<path d="M-38 -91 Q-36 -122 0 -123 Q36 -121 39 -90 L28 -97 Q18 -107 9 -95 Q-5 -106 -15 -94Z" fill="${palette.accent}"/>`
+      : `<path d="M-34 -94 Q-35 -120 -4 -124 Q24 -126 35 -99 Q12 -113 -4 -105 Q-18 -97 -34 -94Z" fill="${palette.ink}" opacity=".86"/>`;
+  const cap = (styleId === "A8" && characterIndex === 0) || (styleId === "B9" && characterIndex === 0)
+    ? `<path d="M-39 -112 Q0 -139 39 -112 L34 -102 H-35Z M-3 -127 Q24 -137 38 -116" fill="${shirt}" stroke="${palette.ink}" stroke-width="4" stroke-linejoin="round"/>`
+    : "";
+  const motionMarks = action === "run" || action === "react"
+    ? `<path d="M-71 -31h-20 M-72 -13h-15 M70 -28h20" stroke="${palette.accent}" stroke-width="5" stroke-linecap="round" opacity=".82"/>`
+    : "";
+
+  return `<g transform="translate(${x} ${groundY - bounce}) scale(${scale})">
+    <ellipse cx="0" cy="8" rx="57" ry="12" fill="${palette.ink}" opacity=".14"/>
+    ${motionMarks}
+    <path d="M-13 31 L${-21 - stride * .35} 77 L${-35 - stride} 125 L-18 127 L0 80 L15 127 L35 125 L${21 + stride} 77 L13 31Z" fill="${palette.ink}" stroke="${palette.ink}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M-24 -44 Q0 -57 24 -44 L20 30 Q0 42 -20 30Z" fill="${shirt}" stroke="${palette.ink}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-20 -33 L${leftArm.elbowX} ${leftArm.elbowY} L${leftArm.handX} ${leftArm.handY} M20 -33 L${rightArm.elbowX} ${rightArm.elbowY} L${rightArm.handX} ${rightArm.handY}" fill="none" stroke="${palette.ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-20 -31 L${leftArm.elbowX} ${leftArm.elbowY} M20 -31 L${rightArm.elbowX} ${rightArm.elbowY}" fill="none" stroke="${shirt}" stroke-width="4" stroke-linecap="round"/>
+    <path d="M-35 125 q-5 9 15 10 h12 l-1 -8 M35 125 q6 9 -14 10 h-12 l1 -8" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="0" cy="-83" r="39" fill="${skin}" stroke="${palette.ink}" stroke-width="5"/>
+    ${hair}${cap}
+    <ellipse cx="-13" cy="-86" rx="6" ry="${blink ? 1.5 : 8}" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="2.5"/>
+    <ellipse cx="13" cy="-86" rx="6" ry="${blink ? 1.5 : 8}" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="2.5"/>
+    ${blink ? "" : `<circle cx="-12" cy="-85" r="2.6" fill="${palette.ink}"/><circle cx="14" cy="-85" r="2.6" fill="${palette.ink}"/>`}
+    <path d="M-22 -99q8 -5 15 0 M8 -99q8 -5 15 0" fill="none" stroke="${palette.ink}" stroke-width="3" stroke-linecap="round"/>
+    ${mouth}
+    <path d="M-2 -77l3 5" stroke="${palette.ink}" stroke-width="2" stroke-linecap="round"/>
+  </g>`;
 }
 
 function textRows(lines: string[], x: number, y: number, fontSize: number, fill: string, weight: number, input: RenderInput, anchor = "start"): string {
@@ -176,6 +264,7 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const width = portrait ? 720 : 1280;
   const height = portrait ? 1280 : 720;
   const palette = STYLE_PALETTES[input.styleId] ?? STYLE_PALETTES.A2!;
+  const cartoonSeries = CARTOON_STYLE_IDS.has(input.styleId);
   const scale = portrait ? 1 : 0.72;
   const sceneWord = input.contentLanguage === "am" ? "ትዕይንት" : input.contentLanguage === "ar" ? "مشهد" : "Scene";
   const titleLines = wrapText(scene.title || `${sceneWord} ${index + 1}`, portrait ? 21 : 34, 2);
@@ -189,8 +278,8 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const frameWord = input.contentLanguage === "am" ? "ትዕይንት" : input.contentLanguage === "ar" ? "مشهد" : "FRAME";
   const frameLabel = `${frameWord} ${String(index + 1).padStart(2, "0")} · ${String(scene.seconds).padStart(2, "0")}s`;
   const textX = input.contentLanguage === "ar" ? width - (portrait ? 50 : 82) : portrait ? 50 : 82;
-  const textAnchor = input.contentLanguage === "ar" ? "end" : "start";
-  const context = contextForScene(scene, input.topic);
+  const textAnchor = "start";
+  const context = contextForScene(scene, input.topic, input.styleId);
   const action = actionForScene(scene);
   const orbit = index % 2 === 0 ? -1 : 1;
   const motion = Math.sin(phase * Math.PI * 2);
@@ -224,10 +313,11 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const rightLeg = walkingAction
     ? { kneeX: 18 + legSwing * .55, kneeY: 125 - Math.max(0, -motion) * 15, footX: 31 + legSwing, footY: 168 - Math.max(0, -motion) * 25 }
     : { kneeX: 23, kneeY: 124, footX: 53, footY: 168 };
+  const calloutScale = cartoonSeries ? 1 + Math.sin(phase * Math.PI * 2) * 0.035 : 1;
   const callout = calloutLines[0]
-    ? `<rect x="${portrait ? 54 : 85}" y="${calloutY - 44}" width="${width - (portrait ? 108 : 170)}" height="64" rx="20" fill="${palette.paper}" opacity=".83"/><text x="${Math.round(width / 2)}" y="${calloutY}" text-anchor="middle" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 23 : 25}" font-weight="600">${escapeXml(calloutLines[0])}</text>`
+    ? `<g transform="translate(${width / 2} ${calloutY - 10}) scale(${calloutScale}) translate(${-width / 2} ${-(calloutY - 10)})"><rect x="${portrait ? 54 : 85}" y="${calloutY - 44}" width="${width - (portrait ? 108 : 170)}" height="64" rx="${cartoonSeries ? 15 : 20}" fill="${palette.paper}" opacity=".94" ${cartoonSeries ? `stroke="${palette.ink}" stroke-width="4"` : ""}/><text x="${Math.round(width / 2)}" y="${calloutY}" text-anchor="middle" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 23 : 25}" font-weight="${cartoonSeries ? 900 : 600}" paint-order="stroke" stroke="${palette.paper}" stroke-width="${cartoonSeries ? 2 : 0}">${escapeXml(calloutLines[0])}</text></g>`
     : "";
-  const environment = sceneEnvironment(context, palette, index, width, height);
+  const environment = sceneEnvironment(context, palette, index, width, height, input.contentLanguage);
   const sceneProp = context === "technology"
     ? `<rect x="-37" y="-48" width="74" height="96" rx="13" fill="${palette.accent}" opacity=".88"/><rect x="-27" y="-37" width="54" height="69" rx="5" fill="${palette.paper}"/><circle cx="0" cy="39" r="4" fill="${palette.paper}"/>`
     : context === "finance"
@@ -240,7 +330,40 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
             ? `<path d="M0 35 C-47 3 -28 -38 0 -38 C28 -38 47 3 0 35Z" fill="${palette.field}" stroke="${palette.accent}" stroke-width="6"/><path d="M0 28 V-28 M0 -1 L-16 -14 M0 8 L17 -8" stroke="${palette.ink}" stroke-width="4"/>`
             : context === "science"
               ? `<circle cx="0" cy="0" r="30" fill="${palette.paper}" stroke="${palette.accent}" stroke-width="7"/><ellipse cx="0" cy="0" rx="48" ry="16" fill="none" stroke="${palette.ink}" stroke-width="4" transform="rotate(-28)"/><circle cx="31" cy="-21" r="7" fill="${palette.accent}"/>`
-              : `<rect x="-38" y="-38" width="76" height="76" rx="21" fill="${palette.accent}" opacity=".88"/><path d="M-18 0 H18 M0 -18 V18" stroke="${palette.paper}" stroke-width="7" stroke-linecap="round"/>`;
+               : `<rect x="-38" y="-38" width="76" height="76" rx="21" fill="${palette.accent}" opacity=".88"/><path d="M-18 0 H18 M0 -18 V18" stroke="${palette.paper}" stroke-width="7" stroke-linecap="round"/>`;
+  const cartoonCharacters = cartoonSeries
+    ? [0, 1, 2].map((characterIndex) => {
+        const positions = portrait ? [124, 360, 596] : [width * 0.25, width * 0.5, width * 0.75];
+        const x = positions[input.contentLanguage === "ar" ? 2 - characterIndex : characterIndex]!;
+        const actions: CartoonAction[] = [
+          action,
+          action === "run" || action === "celebrate" ? "react" : "listen",
+          action === "walk" ? "wave" : "react",
+        ];
+        const shirts = [palette.accent, "#4b84ae", "#6d9b78"];
+        const skins = ["#ffd65f", "#fff5e8", "#efbd91"];
+        return cartoonCharacter(
+          x,
+          portrait ? 925 : 455,
+          portrait ? 0.87 : 0.72,
+          shirts[characterIndex]!,
+          skins[characterIndex]!,
+          palette,
+          phase,
+          actions[characterIndex]!,
+          characterIndex,
+          input.styleId,
+        );
+      }).join("")
+    : `<g transform="translate(${stickX} ${stickY + bodyBob}) scale(${scale})">
+    <ellipse cx="0" cy="190" rx="120" ry="22" fill="${palette.ink}" opacity=".12"/>
+    <circle cx="0" cy="-95" r="49" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="9"/>
+    <path d="M0 -45 L0 83 M0 -5 L${leftArm.elbowX * orbit} ${leftArm.elbowY} L${leftArm.handX * orbit} ${leftArm.handY} M0 -5 L${rightArm.elbowX * orbit} ${rightArm.elbowY} L${rightArm.handX * orbit} ${rightArm.handY} M0 82 L${leftLeg.kneeX * orbit} ${leftLeg.kneeY} L${leftLeg.footX * orbit} ${leftLeg.footY} M0 82 L${rightLeg.kneeX * orbit} ${rightLeg.kneeY} L${rightLeg.footX * orbit} ${rightLeg.footY}" fill="none" stroke="${palette.ink}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${leftArm.elbowX * orbit}" cy="${leftArm.elbowY}" r="6" fill="${palette.ink}"/>
+    <circle cx="${rightArm.elbowX * orbit}" cy="${rightArm.elbowY}" r="6" fill="${palette.ink}"/>
+    <circle cx="${18 * orbit}" cy="-105" r="5" fill="${palette.ink}"/>
+    <path d="M${6 * orbit} -78 Q${23 * orbit} -65 ${35 * orbit} -82" fill="none" stroke="${palette.accent}" stroke-width="5" stroke-linecap="round"/>
+  </g>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs><linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${palette.paper}"/><stop offset="1" stop-color="${palette.field}"/></linearGradient></defs>
@@ -251,18 +374,10 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   <text x="${textX}" y="${portrait ? 83 : 76}" text-anchor="${textAnchor}" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" opacity=".68" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 17 : 16}" font-weight="700" letter-spacing="3">${escapeXml(frameLabel)}</text>
   ${textRows(titleLines, textX, titleY, titleSize, palette.ink, 700, input, textAnchor)}
   ${callout}
-  <g transform="translate(${stickX} ${stickY + bodyBob}) scale(${scale})">
-    <ellipse cx="0" cy="190" rx="120" ry="22" fill="${palette.ink}" opacity=".12"/>
-    <circle cx="0" cy="-95" r="49" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="9"/>
-    <path d="M0 -45 L0 83 M0 -5 L${leftArm.elbowX * orbit} ${leftArm.elbowY} L${leftArm.handX * orbit} ${leftArm.handY} M0 -5 L${rightArm.elbowX * orbit} ${rightArm.elbowY} L${rightArm.handX * orbit} ${rightArm.handY} M0 82 L${leftLeg.kneeX * orbit} ${leftLeg.kneeY} L${leftLeg.footX * orbit} ${leftLeg.footY} M0 82 L${rightLeg.kneeX * orbit} ${rightLeg.kneeY} L${rightLeg.footX * orbit} ${rightLeg.footY}" fill="none" stroke="${palette.ink}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${leftArm.elbowX * orbit}" cy="${leftArm.elbowY}" r="6" fill="${palette.ink}"/>
-    <circle cx="${rightArm.elbowX * orbit}" cy="${rightArm.elbowY}" r="6" fill="${palette.ink}"/>
-    <circle cx="${18 * orbit}" cy="-105" r="5" fill="${palette.ink}"/>
-    <path d="M${6 * orbit} -78 Q${23 * orbit} -65 ${35 * orbit} -82" fill="none" stroke="${palette.accent}" stroke-width="5" stroke-linecap="round"/>
-  </g>
-  <g transform="translate(${propX} ${portrait ? 795 : 344}) rotate(${propRotation})">
+  ${cartoonCharacters}
+  ${cartoonSeries ? "" : `<g transform="translate(${propX} ${portrait ? 795 : 344}) rotate(${propRotation})">
     ${sceneProp}
-  </g>
+  </g>`}
   <text x="${textX}" y="${portrait ? 1220 : 690}" text-anchor="${textAnchor}" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" opacity=".55" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 14 : 13}" font-weight="600" letter-spacing="2">${escapeXml(input.title.slice(0, 42).toLocaleUpperCase(input.contentLanguage === "am" ? "am-ET" : input.contentLanguage))}</text>
 </svg>`;
 }
