@@ -75,6 +75,7 @@ router.post("/videos/render", async (req, res): Promise<void> => {
   try {
     const rendered = await renderStoryboardVideo({
       title: project.title,
+      topic: project.topic,
       aspectRatio: project.aspectRatio,
       styleId: project.styleId,
       voiceover: project.voiceover,

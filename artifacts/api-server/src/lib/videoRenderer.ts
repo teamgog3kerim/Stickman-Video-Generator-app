@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -21,6 +20,7 @@ type RenderScene = {
 
 type RenderInput = {
   title: string;
+  topic: string;
   aspectRatio: "16:9" | "9:16";
   styleId: string;
   voiceover: boolean;
@@ -81,27 +81,31 @@ function wrapText(value: string, maxChars: number, maxLines: number): string[] {
   return lines.length ? lines : [""];
 }
 
-function contextForScene(scene: RenderScene): SceneContext {
-  const text = `${scene.title} ${scene.narration} ${scene.visualDirection} ${scene.visualMetaphor ?? ""}`.toLowerCase();
-  if (/\b(tree|forest|plant|garden|climate|nature|ocean|river|earth|weather|energy)\b/.test(text)) return "nature";
-  if (/\b(money|budget|bank|finance|price|cost|invest|saving|debt|profit|market|econom)\b/.test(text)) return "finance";
-  if (/\b(technology|phone|app|computer|code|digital|internet|battery|ai|software|robot|data)\b/.test(text)) return "technology";
-  if (/\b(science|atom|physics|experiment|space|planet|molecule|research|gravity|chemistry)\b/.test(text)) return "science";
-  if (/\b(health|heart|doctor|medical|exercise|fitness|sleep|brain|body|wellness)\b/.test(text)) return "health";
-  if (/\b(learn|learning|school|student|teacher|study|education|book|class|memory|skill)\b/.test(text)) return "learning";
-  if (/\b(food|cook|recipe|kitchen|meal|bread|fruit|nutrition|restaurant)\b/.test(text)) return "food";
-  if (/\b(city|travel|journey|road|transport|train|bus|street|building|community)\b/.test(text)) return "city";
-  return "studio";
+function contextForScene(scene: RenderScene, topic: string): SceneContext {
+  const classify = (text: string): SceneContext | null => {
+    const value = text.toLowerCase();
+    if (/\b(technology|phone|app|computer|code|digital|internet|battery|ai|software|robot|data)\b/.test(value)) return "technology";
+    if (/\b(tree|forest|plant|garden|climate|nature|ocean|river|earth|weather|solar|renewable|wind|energy)\b/.test(value)) return "nature";
+    if (/\b(money|budget|bank|finance|price|cost|invest|saving|debt|profit|market|econom)\b/.test(value)) return "finance";
+    if (/\b(science|atom|physics|experiment|space|planet|molecule|research|gravity|chemistry)\b/.test(value)) return "science";
+    if (/\b(health|heart|doctor|medical|exercise|fitness|sleep|brain|body|wellness)\b/.test(value)) return "health";
+    if (/\b(learn|learning|school|student|teacher|study|education|book|class|memory|skill)\b/.test(value)) return "learning";
+    if (/\b(food|cook|recipe|kitchen|meal|bread|fruit|nutrition|restaurant)\b/.test(value)) return "food";
+    if (/\b(city|travel|journey|road|transport|train|bus|street|building|community)\b/.test(value)) return "city";
+    return null;
+  };
+  const sceneText = `${scene.title} ${scene.narration} ${scene.visualDirection} ${scene.visualMetaphor ?? ""}`;
+  return classify(sceneText) ?? classify(topic) ?? "studio";
 }
 
 function actionForScene(scene: RenderScene): StickmanAction {
   const text = `${scene.title} ${scene.narration} ${scene.visualDirection}`.toLowerCase();
-  if (/\b(run|race|sprint|rush|chase)\b/.test(text)) return "run";
-  if (/\b(walk|travel|move|journey|step|progress)\b/.test(text)) return "walk";
-  if (/\b(wave|welcome|greet|hello)\b/.test(text)) return "wave";
-  if (/\b(think|consider|reflect|wonder|plan|decide)\b/.test(text)) return "think";
-  if (/\b(celebrate|success|win|achieve|breakthrough|milestone)\b/.test(text)) return "celebrate";
-  if (/\b(lift|raise|carry|build|grow|reach)\b/.test(text)) return "lift";
+  if (/\b(run(?:ning)?|race|sprint|rush(?:ed|ing)?|chase(?:s|d|ing)?)\b/.test(text)) return "run";
+  if (/\b(walk(?:s|ed|ing)?|travel(?:s|ed|ing)?|move(?:s|d|ing)?|journey|step(?:s|ped|ping)?|progress)\b/.test(text)) return "walk";
+  if (/\b(wav(?:e|es|ed|ing)|welcome|greet(?:s|ed|ing)?|hello)\b/.test(text)) return "wave";
+  if (/\b(think(?:s|ing)?|consider(?:s|ed|ing)?|reflect(?:s|ed|ing)?|wonder(?:s|ed|ing)?|plan(?:s|ned|ning)?|decide(?:s|d|ing)?)\b/.test(text)) return "think";
+  if (/\b(celebrat(?:e|es|ed|ing)|success|win(?:s|ning)?|achiev(?:e|es|ed|ing)|breakthrough|milestone)\b/.test(text)) return "celebrate";
+  if (/\b(lift(?:s|ed|ing)?|rais(?:e|es|ed|ing)|carr(?:y|ies|ied|ying)|build(?:s|ing)|grow(?:s|ing|th)?|reach(?:es|ed|ing)?)\b/.test(text)) return "lift";
   return "present";
 }
 
@@ -164,9 +168,9 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const calloutY = portrait ? 425 : 258;
   const stickX = portrait ? 355 : 855;
   const stickY = portrait ? 800 : 372;
-  const propX = portrait ? 360 : 1005;
+  const propX = portrait ? 585 : 1005;
   const frameLabel = `FRAME ${String(index + 1).padStart(2, "0")} · ${String(scene.seconds).padStart(2, "0")}s`;
-  const context = contextForScene(scene);
+  const context = contextForScene(scene, input.topic);
   const action = actionForScene(scene);
   const orbit = index % 2 === 0 ? -1 : 1;
   const motion = Math.sin(phase * Math.PI * 2);
@@ -326,10 +330,10 @@ export async function renderStoryboardVideo(input: RenderInput): Promise<{ buffe
         const sourceDuration = await mediaDuration(audioPath);
         const targetDuration = Math.max(1, scene.seconds);
         const rawTempo = sourceDuration / targetDuration;
-        if (rawTempo < 0.45 || rawTempo > 1.85) {
-          throw new Error(`Narration for scene ${index + 1} is too short or long for its ${targetDuration}-second duration.`);
+        if (rawTempo < 0.55 || rawTempo > 1.8) {
+          throw new Error(`Narration for scene ${index + 1} would need an unnatural playback speed for its ${targetDuration}-second duration.`);
         }
-        const tempo = Math.min(1.45, Math.max(0.7, rawTempo));
+        const tempo = rawTempo;
         voiceoverPaths.push(audioPath);
         voiceoverSpeeds.push(tempo);
         spokenDurations.push(Math.min(targetDuration, sourceDuration / tempo));

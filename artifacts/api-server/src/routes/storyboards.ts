@@ -76,8 +76,8 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
     }
 
     const generated = JSON.parse(content) as Record<string, unknown>;
-    const rawScenes = Array.isArray(generated.scenes) ? generated.scenes.slice(0, 12) : [];
-    if (rawScenes.length < Math.max(3, Math.ceil(durationSeconds / 90))) {
+    const rawScenes = Array.isArray(generated.scenes) ? generated.scenes.slice(0, desiredScenes) : [];
+    if (rawScenes.length < desiredScenes) {
       res.status(502).json({ error: "The storyboard service returned an incomplete draft. Try again." });
       return;
     }
