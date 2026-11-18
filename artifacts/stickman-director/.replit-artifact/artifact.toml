@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/stickman-director/"
+title = "Stickman Video Director"
+description = "A focused video-planning workspace for turning an idea into a stickman explainer storyboard. Choose a creation engine and style, shape scenes, and export a production-ready brief."
+version = "1.0.0"
+id = "artifacts/stickman-director"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/stickman-director/" ]
+localPort = 23363
+
+[services.development]
+run = "pnpm --filter @workspace/stickman-director run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/stickman-director", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/stickman-director/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23363"
+BASE_PATH = "/stickman-director/"
