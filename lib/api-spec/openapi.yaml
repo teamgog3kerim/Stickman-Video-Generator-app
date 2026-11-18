@@ -440,7 +440,7 @@ components:
           pattern: "^[a-zA-Z0-9_]+$"
         password:
           type: string
-          minLength: 12
+          minLength: 6
           maxLength: 128
         bootstrapToken:
           type: string
@@ -467,7 +467,7 @@ components:
           maxLength: 128
         newPassword:
           type: string
-          minLength: 12
+          minLength: 6
           maxLength: 128
       required: [currentPassword, newPassword]
     Scene:

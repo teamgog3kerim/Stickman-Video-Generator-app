@@ -19,7 +19,7 @@ export interface SignUpInput {
      */
   username: string;
   /**
-     * @minLength 12
+     * @minLength 6
      * @maxLength 128
      */
   password: string;

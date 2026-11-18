@@ -64,7 +64,7 @@ async function createSession(userId: string, res: Response): Promise<void> {
 router.post("/auth/signup", async (req, res): Promise<void> => {
   const parsed = SignUpBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Enter a name, a username, and a password of at least 12 characters." });
+    res.status(400).json({ error: "Enter a name, a username, and a password of at least 6 characters." });
     return;
   }
 
@@ -213,7 +213,7 @@ router.get("/auth/me", requireAuth, (req, res): void => {
 router.post("/auth/password", requireAuth, async (req, res): Promise<void> => {
   const parsed = ChangePasswordBody.safeParse(req.body);
   if (!parsed.success || !req.authUser || !req.authSessionTokenHash) {
-    res.status(400).json({ error: "The new password must be at least 12 characters." });
+    res.status(400).json({ error: "The new password must be at least 6 characters." });
     return;
   }
 

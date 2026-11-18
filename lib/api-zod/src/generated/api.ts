@@ -27,7 +27,7 @@ export const signUpBodyUsernameMax = 32;
 
 
 export const signUpBodyUsernameRegExp = new RegExp('^[a-zA-Z0-9_]+$');
-export const signUpBodyPasswordMin = 12;
+export const signUpBodyPasswordMin = 6;
 export const signUpBodyPasswordMax = 128;
 
 export const signUpBodyBootstrapTokenMax = 256;
@@ -97,7 +97,7 @@ export const GetCurrentUserResponse = zod.object({
  */
 export const changePasswordBodyCurrentPasswordMax = 128;
 
-export const changePasswordBodyNewPasswordMin = 12;
+export const changePasswordBodyNewPasswordMin = 6;
 export const changePasswordBodyNewPasswordMax = 128;
 
 

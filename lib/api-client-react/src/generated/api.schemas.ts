@@ -42,7 +42,7 @@ export interface SignUpInput {
      */
   username: string;
   /**
-     * @minLength 12
+     * @minLength 6
      * @maxLength 128
      */
   password: string;
@@ -70,7 +70,7 @@ export interface PasswordChangeInput {
      */
   currentPassword: string;
   /**
-     * @minLength 12
+     * @minLength 6
      * @maxLength 128
      */
   newPassword: string;
