@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Copy, Download, ExternalLink, Film, Instagram, Sparkles, Youtube } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useGenerateVideoShareCopy } from "@workspace/api-client-react";
@@ -54,17 +54,23 @@ export function VideoShareDialog({
   const [generatedFor, setGeneratedFor] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState<string[]>([]);
+  const autoStartedFor = useRef<string | null>(null);
 
   useEffect(() => {
     if (!video) {
       generate.reset();
       setGeneratedFor(null);
+      autoStartedFor.current = null;
       return;
     }
     setPlatform("youtube");
     setCaption("");
     setHashtags([]);
     setGeneratedFor(null);
+    if (autoStartedFor.current !== video.id) {
+      autoStartedFor.current = video.id;
+      generate.mutate({ id: video.id }, { onSuccess: () => setGeneratedFor(video.id) });
+    }
   }, [video?.id]);
 
   const copy = generatedFor === video?.id
@@ -95,6 +101,7 @@ export function VideoShareDialog({
 
   const generateCopy = () => {
     if (!video) return;
+    autoStartedFor.current = video.id;
     generate.mutate({ id: video.id }, { onSuccess: () => setGeneratedFor(video.id) });
   };
 
@@ -154,10 +161,10 @@ export function VideoShareDialog({
               {!copy && !generate.isPending && !generate.isError && (
                 <div className="share-copy-intro" data-testid="panel-share-copy-intro">
                   <p>{t("Generate a caption and relevant hashtags for all three platforms. This uses Replit AI credits; suggestions are not live trend rankings.")}</p>
-                  <button type="button" className="btn btn-primary" data-testid="button-generate-share-copy" onClick={generateCopy}><Sparkles size={14}/>{t("Generate captions & hashtags")}</button>
+                  <button type="button" className="btn btn-primary" data-testid="button-generate-share-copy" disabled={generate.isPending} onClick={generateCopy}><Sparkles size={14}/>{t("Generate captions & hashtags")}</button>
                 </div>
               )}
-              {generate.isPending && <div className="share-loading" role="status" data-testid="status-share-copy-loading"><i/><span>{t("Writing platform-specific share copy…")}</span></div>}
+              {generate.isPending && <div className="share-loading" role="status" aria-live="polite" data-testid="status-share-copy-loading"><i/><span>{t("Writing platform-specific share copy…")}</span></div>}
               {generate.isError && (
                 <div className="share-copy-error" role="alert" data-testid="status-share-copy-error">
                   <p>{t("Could not generate captions and hashtags.")}</p>
@@ -190,7 +197,7 @@ export function VideoShareDialog({
                     <button type="button" className="btn btn-outline" data-testid="button-copy-share-text" onClick={copyShareText}><Copy size={14}/>{t("Copy share text")}</button>
                     <button type="button" className="btn btn-primary" data-testid="button-open-social-platform" onClick={openPlatform}><ExternalLink size={14}/>{t("Open")} {platforms.find((item) => item.id === platform)?.label}</button>
                   </div>
-                  <p className="share-upload-note">{t("OAuth is not connected in this app. Upload the MP4 on the platform page after copying your text.")}</p>
+                  <p className="share-upload-note">{t("Copy your caption and hashtags, then upload the MP4 on the selected platform. Direct account posting becomes available after social app setup.")}</p>
                 </>
               )}
             </div>

@@ -1,10 +1,10 @@
 ---
-name: OAuth restriction
-description: The user's app-wide restriction on OAuth and its effect on social sharing.
+name: Social account authorization
+description: Username/password remains the app sign-in method; social posting may use provider authorization.
 ---
 
-For this app, do not add OAuth for sign-in or social account connections.
+Keep the app's own sign-in on username and password. The user has approved provider account authorization for optional direct social publishing.
 
-**Why:** the user explicitly asked not to use OAuth throughout the app.
+**Why:** the user later approved linking social accounts, while making no change to the username/password sign-in flow.
 
-**How to apply:** keep social sharing guided/manual unless the user changes this restriction; direct publishing that requires provider authorization is out of scope.
+**How to apply:** use provider authorization only for social accounts that publish videos. Never add OAuth sign-in. Require each platform's approved developer app configuration before enabling direct posting; otherwise keep guided/manual sharing available.

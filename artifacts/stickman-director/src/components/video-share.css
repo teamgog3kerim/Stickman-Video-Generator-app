@@ -43,3 +43,10 @@
   .director-dialog .share-dialog-header{margin-bottom:14px}
   .share-actions{flex-direction:column}
 }
+@media(max-width:680px){
+  .share-platform{min-height:42px;font-size:10px}
+  .share-download,.share-actions .btn,.share-copy-intro .btn{min-height:44px;font-size:11px}
+  .share-field input,.share-field textarea{font-size:13px}
+  .share-tags{gap:8px}
+  .share-tag{min-height:36px;padding:8px 10px;font-size:10px}
+}

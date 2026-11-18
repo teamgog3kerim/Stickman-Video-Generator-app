@@ -173,3 +173,42 @@ html[lang="am-ET"] .display,html[lang="ar"] .display{font-family:inherit;font-we
 .app-shell[dir="rtl"] .cast-member-heading,.app-shell[dir="rtl"] .cast-panel-heading,.app-shell[dir="rtl"] .cast-field-grid,.app-shell[dir="rtl"] .choreography-fields{direction:rtl}
 .app-shell[dir="rtl"] .cast-add-button span{margin-left:0;margin-right:auto}
 @media(max-width:680px){.cast-member-grid{grid-template-columns:1fr}.cast-member-card{padding:11px}.choreography-fields{grid-template-columns:1fr}}
+
+/* Responsive controls and touch targets for phones and tablets */
+.btn:focus-visible,.draft-button:focus-visible,.nav-item:focus-visible,.icon-button:focus-visible,.reorder button:focus-visible,.provider-disabled:focus-visible,.share-platform:focus-visible,.share-tag:focus-visible{outline:3px solid #376b82;outline-offset:2px}
+.draft-button:disabled,.btn:disabled{opacity:.58;cursor:not-allowed}
+.toast{width:min(560px,calc(100vw - 32px));line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+.render-progress{display:flex;align-items:center;gap:9px;margin-top:11px;padding:11px 13px;border:1px solid #d9e3d5;border-radius:7px;background:#edf2e9;color:#5e7664;font-size:11px;line-height:1.5}
+.render-progress i{width:15px;height:15px;flex:none;border:2px solid #c6d4c1;border-top-color:#5d8267;border-radius:50%;animation:render-spin .8s linear infinite}
+@keyframes render-spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){
+  .content{padding-inline:clamp(16px,3vw,26px)}
+  .approval-step{align-items:flex-start}
+  .approval-step .brief-actions .btn{min-height:42px}
+  .scene-extra-grid,.choreography-fields{gap:10px}
+}
+@media(max-width:680px){
+  .btn,.draft-button,.add-scene,.empty-add,.nav-item,.provider-disabled{min-height:42px}
+  .scene-actions{gap:3px}
+  .reorder button,.icon-button{width:36px;height:36px}
+  .scene-name{font-size:12px}
+  .scene-text{font-size:12px;min-height:48px;padding:7px}
+  .scene-text.narration{min-height:58px}
+  .scene-extra-grid input,.scene-extra-grid select,.choreography-fields select{min-height:40px;font-size:12px}
+  .seconds-label input{min-height:36px;width:46px;font-size:11px}
+  .brief-actions{width:100%;flex-wrap:wrap}
+  .brief-actions .btn{min-height:44px;white-space:normal;line-height:1.35}
+  .provider-row{grid-template-columns:34px minmax(0,1fr) auto;gap:8px}
+  .provider-disabled{grid-column:2/-1;justify-self:start;padding-inline:12px}
+  .provider-info span{line-height:1.4}
+}
+@media(max-width:420px){
+  .scene-card{grid-template-columns:58px minmax(0,1fr)}
+  .scene-rail{padding-inline:5px}
+  .scene-body{padding-inline:7px}
+  .scene-extra-grid{grid-template-columns:1fr}
+  .approval-step .brief-actions{display:grid;grid-template-columns:1fr}
+  .storyboard-title{gap:8px}
+  .storyboard-title p{max-width:195px}
+  .toast{bottom:14px;font-size:12px}
+}

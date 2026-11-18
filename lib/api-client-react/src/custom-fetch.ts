@@ -148,8 +148,19 @@ function truncate(text: string, maxLength = 300): string {
   return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
 }
 
+function isHtmlError(response: Response, data: unknown): boolean {
+  const mediaType = getMediaType(response.headers);
+  if (mediaType === "text/html" || mediaType === "application/xhtml+xml") return true;
+  if (typeof data !== "string") return false;
+  return /^\s*(?:<!doctype\s+html\b|<html\b|<head\b|<body\b)/i.test(data);
+}
+
 function buildErrorMessage(response: Response, data: unknown): string {
   const prefix = `HTTP ${response.status} ${response.statusText}`;
+
+  if (isHtmlError(response, data)) {
+    return `${prefix}: The server returned an error page. Please try again shortly.`;
+  }
 
   if (typeof data === "string") {
     const text = data.trim();

@@ -187,8 +187,24 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
     });
     res.json(draft);
   } catch (error) {
-    const status = error && typeof error === "object" && "status" in error ? error.status : undefined;
-    req.log.error({ status }, "Storyboard generation failed");
+    const details =
+      error && typeof error === "object"
+        ? (error as { status?: unknown; code?: unknown })
+        : undefined;
+    const status = typeof details?.status === "number" ? details.status : undefined;
+    const code = typeof details?.code === "string" ? details.code : undefined;
+    req.log.error(
+      {
+        providerStatus: status,
+        providerCode: code,
+        errorName: error instanceof Error ? error.name : "UnknownError",
+      },
+      "Storyboard generation failed",
+    );
+    if (status === 429) {
+      res.status(429).json({ error: "The storyboard service is busy. Please try again shortly." });
+      return;
+    }
     res.status(502).json({ error: "Storyboard generation failed. Try again shortly." });
   }
 });
