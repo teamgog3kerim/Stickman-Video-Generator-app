@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { DownloadedVideoAspectRatio } from './downloadedVideoAspectRatio';
+import type { LanguageCode } from './languageCode';
 
 export interface DownloadedVideo {
   id: string;
@@ -14,6 +15,7 @@ export interface DownloadedVideo {
   title: string;
   topic: string;
   aspectRatio: DownloadedVideoAspectRatio;
+  contentLanguage: LanguageCode;
   durationSeconds: number;
   fileName: string;
   byteSize: number;

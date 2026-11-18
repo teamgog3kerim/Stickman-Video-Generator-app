@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LanguageCode } from './languageCode';
 
 export interface SignUpInput {
   /**
@@ -25,4 +26,6 @@ export interface SignUpInput {
   password: string;
   /** @maxLength 256 */
   bootstrapToken?: string;
+  locale?: LanguageCode;
+  contentLanguage?: LanguageCode;
 }

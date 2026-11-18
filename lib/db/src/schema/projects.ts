@@ -35,6 +35,7 @@ export const projectsTable = pgTable(
     voiceover: boolean("voiceover").notNull().default(true),
     subtitles: boolean("subtitles").notNull().default(true),
     soundEffects: boolean("sound_effects").notNull().default(false),
+    contentLanguage: text("content_language").$type<"en" | "am" | "ar">().notNull().default("en"),
     scenes: jsonb("scenes").$type<ProjectScene[]>().notNull().default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     approvedAt: timestamp("approved_at", { withTimezone: true }),

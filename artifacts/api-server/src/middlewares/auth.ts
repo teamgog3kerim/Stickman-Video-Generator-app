@@ -12,6 +12,8 @@ export type SessionUser = {
   username: string;
   role: "user" | "admin";
   mustChangePassword: boolean;
+  locale: "en" | "am" | "ar";
+  contentLanguage: "en" | "am" | "ar";
 };
 
 declare global {
@@ -51,6 +53,8 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
       username: usersTable.username,
       role: usersTable.role,
       mustChangePassword: usersTable.mustChangePassword,
+      locale: usersTable.locale,
+      contentLanguage: usersTable.contentLanguage,
     })
     .from(sessionsTable)
     .innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
@@ -94,5 +98,7 @@ export function safeUser(user: SessionUser): SessionUser {
     username: user.username,
     role: user.role,
     mustChangePassword: user.mustChangePassword,
+    locale: user.locale,
+    contentLanguage: user.contentLanguage,
   };
 }

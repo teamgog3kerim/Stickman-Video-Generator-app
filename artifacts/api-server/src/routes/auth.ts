@@ -8,6 +8,7 @@ import {
   LogInResponse,
   SignUpBody,
   SignUpResponse,
+  UpdateUserPreferencesBody,
 } from "@workspace/api-zod";
 import { db, sessionsTable, usersTable } from "@workspace/db";
 import {
@@ -110,6 +111,8 @@ router.post("/auth/signup", async (req, res): Promise<void> => {
         .values({
           fullName,
           username,
+          locale: parsed.data.locale ?? "en",
+          contentLanguage: parsed.data.contentLanguage ?? parsed.data.locale ?? "en",
           passwordHash: password.hash,
           passwordSalt: password.salt,
           role,
@@ -120,6 +123,8 @@ router.post("/auth/signup", async (req, res): Promise<void> => {
           username: usersTable.username,
           role: usersTable.role,
           mustChangePassword: usersTable.mustChangePassword,
+          locale: usersTable.locale,
+          contentLanguage: usersTable.contentLanguage,
         });
 
       if (!created) throw new Error("Account creation failed.");
@@ -188,6 +193,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
       username: user.username,
       role: user.role,
       mustChangePassword: user.mustChangePassword,
+      locale: user.locale,
+      contentLanguage: user.contentLanguage,
     }),
   );
 });
@@ -208,6 +215,27 @@ router.get("/auth/me", requireAuth, (req, res): void => {
     return;
   }
   res.json(GetCurrentUserResponse.parse(safeUser(req.authUser)));
+});
+
+router.patch("/auth/preferences", requireAuth, async (req, res): Promise<void> => {
+  const parsed = UpdateUserPreferencesBody.safeParse(req.body);
+  if (!parsed.success || !req.authUser) {
+    res.status(400).json({ error: "Choose a supported interface and content language." });
+    return;
+  }
+  const [updated] = await db
+    .update(usersTable)
+    .set({
+      locale: parsed.data.locale,
+      contentLanguage: parsed.data.contentLanguage,
+    })
+    .where(eq(usersTable.id, req.authUser.id))
+    .returning();
+  if (!updated) {
+    res.status(404).json({ error: "Account not found." });
+    return;
+  }
+  res.json(GetCurrentUserResponse.parse(safeUser(updated)));
 });
 
 router.post("/auth/password", requireAuth, async (req, res): Promise<void> => {

@@ -23,6 +23,7 @@ type RenderInput = {
   topic: string;
   aspectRatio: "16:9" | "9:16";
   styleId: string;
+  contentLanguage: "en" | "am" | "ar";
   voiceover: boolean;
   subtitles: boolean;
   scenes: RenderScene[];
@@ -84,14 +85,15 @@ function wrapText(value: string, maxChars: number, maxLines: number): string[] {
 function contextForScene(scene: RenderScene, topic: string): SceneContext {
   const classify = (text: string): SceneContext | null => {
     const value = text.toLowerCase();
-    if (/\b(technology|phone|app|computer|code|digital|internet|battery|ai|software|robot|data)\b/.test(value)) return "technology";
-    if (/\b(tree|forest|plant|garden|climate|nature|ocean|river|earth|weather|solar|renewable|wind|energy)\b/.test(value)) return "nature";
-    if (/\b(money|budget|bank|finance|price|cost|invest|saving|debt|profit|market|econom)\b/.test(value)) return "finance";
-    if (/\b(science|atom|physics|experiment|space|planet|molecule|research|gravity|chemistry)\b/.test(value)) return "science";
-    if (/\b(health|heart|doctor|medical|exercise|fitness|sleep|brain|body|wellness)\b/.test(value)) return "health";
-    if (/\b(learn|learning|school|student|teacher|study|education|book|class|memory|skill)\b/.test(value)) return "learning";
-    if (/\b(food|cook|recipe|kitchen|meal|bread|fruit|nutrition|restaurant)\b/.test(value)) return "food";
-    if (/\b(city|travel|journey|road|transport|train|bus|street|building|community)\b/.test(value)) return "city";
+    const has = (terms: string[]) => terms.some((term) => value.includes(term));
+    if (/\b(technology|phone|app|computer|code|digital|internet|battery|ai|software|robot|data)\b/.test(value) || has(["ስልክ", "ቴክኖሎጂ", "ኮምፒውተር", "ኮድ", "ዲጂታል", "ኢንተርኔት", "ባትሪ", "ሶፍትዌር", "ሮቦት", "መረጃ", "هاتف", "تقنية", "تكنولوجيا", "حاسوب", "برمجة", "رقمي", "إنترنت", "بطارية", "ذكاء اصطناعي", "برنامج", "روبوت", "بيانات"])) return "technology";
+    if (/\b(tree|forest|plant|garden|climate|nature|ocean|river|earth|weather|solar|renewable|wind|energy)\b/.test(value) || has(["ዛፍ", "ደን", "ተክል", "አትክልት", "የአየር ንብረት", "ተፈጥሮ", "ውቅያኖስ", "ወንዝ", "ምድር", "የአየር ሁኔታ", "ፀሐይ", "ንፋስ", "ኃይል", "شجرة", "غابة", "نبات", "حديقة", "مناخ", "طبيعة", "محيط", "نهر", "أرض", "طقس", "طاقة", "رياح"])) return "nature";
+    if (/\b(money|budget|bank|finance|price|cost|invest|saving|debt|profit|market|econom)\b/.test(value) || has(["ገንዘብ", "በጀት", "ባንክ", "ፋይናንስ", "ዋጋ", "ወጪ", "ኢንቨስት", "ቁጠባ", "ዕዳ", "ትርፍ", "ገበያ", "ኢኮኖሚ", "مال", "ميزانية", "بنك", "تمويل", "سعر", "تكلفة", "استثمار", "ادخار", "دين", "ربح", "سوق", "اقتصاد"])) return "finance";
+    if (/\b(science|atom|physics|experiment|space|planet|molecule|research|gravity|chemistry)\b/.test(value) || has(["ሳይንስ", "አቶም", "ፊዚክስ", "ሙከራ", "ጠፈር", "ፕላኔት", "ሞለኪውል", "ምርምር", "ስበት", "ኬሚስትሪ", "علوم", "ذرة", "فيزياء", "تجربة", "فضاء", "كوكب", "جزيء", "بحث", "جاذبية", "كيمياء"])) return "science";
+    if (/\b(health|heart|doctor|medical|exercise|fitness|sleep|brain|body|wellness)\b/.test(value) || has(["ጤና", "ልብ", "ሐኪም", "ሕክምና", "እንቅስቃሴ", "የአካል ብቃት", "እንቅልፍ", "አንጎል", "ሰውነት", "ደህንነት", "صحة", "قلب", "طبيب", "طبي", "تمرين", "لياقة", "نوم", "دماغ", "جسم", "عافية"])) return "health";
+    if (/\b(learn|learning|school|student|teacher|study|education|book|class|memory|skill)\b/.test(value) || has(["መማር", "ትምህርት ቤት", "ተማሪ", "መምህር", "ጥናት", "ትምህርት", "መጽሐፍ", "ክፍል", "ትውስታ", "ክህሎት", "تعلم", "مدرسة", "طالب", "معلم", "دراسة", "تعليم", "كتاب", "صف", "ذاكرة", "مهارة"])) return "learning";
+    if (/\b(food|cook|recipe|kitchen|meal|bread|fruit|nutrition|restaurant)\b/.test(value) || has(["ምግብ", "ማብሰል", "የምግብ አሰራር", "ወጥ ቤት", "ምሳ", "ዳቦ", "ፍራፍሬ", "አመጋገብ", "ምግብ ቤት", "طعام", "طبخ", "وصفة", "مطبخ", "وجبة", "خبز", "فاكهة", "تغذية", "مطعم"])) return "food";
+    if (/\b(city|travel|journey|road|transport|train|bus|street|building|community)\b/.test(value) || has(["ከተማ", "ጉዞ", "መንገድ", "ትራንስፖርት", "ባቡር", "አውቶቡስ", "ጎዳና", "ሕንፃ", "ማኅበረሰብ", "مدينة", "سفر", "رحلة", "طريق", "نقل", "قطار", "حافلة", "شارع", "مبنى", "مجتمع"])) return "city";
     return null;
   };
   const sceneText = `${scene.title} ${scene.narration} ${scene.visualDirection} ${scene.visualMetaphor ?? ""}`;
@@ -100,12 +102,13 @@ function contextForScene(scene: RenderScene, topic: string): SceneContext {
 
 function actionForScene(scene: RenderScene): StickmanAction {
   const text = `${scene.title} ${scene.narration} ${scene.visualDirection}`.toLowerCase();
-  if (/\b(run(?:ning)?|race|sprint|rush(?:ed|ing)?|chase(?:s|d|ing)?)\b/.test(text)) return "run";
-  if (/\b(walk(?:s|ed|ing)?|travel(?:s|ed|ing)?|move(?:s|d|ing)?|journey|step(?:s|ped|ping)?|progress)\b/.test(text)) return "walk";
-  if (/\b(wav(?:e|es|ed|ing)|welcome|greet(?:s|ed|ing)?|hello)\b/.test(text)) return "wave";
-  if (/\b(think(?:s|ing)?|consider(?:s|ed|ing)?|reflect(?:s|ed|ing)?|wonder(?:s|ed|ing)?|plan(?:s|ned|ning)?|decide(?:s|d|ing)?)\b/.test(text)) return "think";
-  if (/\b(celebrat(?:e|es|ed|ing)|success|win(?:s|ning)?|achiev(?:e|es|ed|ing)|breakthrough|milestone)\b/.test(text)) return "celebrate";
-  if (/\b(lift(?:s|ed|ing)?|rais(?:e|es|ed|ing)|carr(?:y|ies|ied|ying)|build(?:s|ing)|grow(?:s|ing|th)?|reach(?:es|ed|ing)?)\b/.test(text)) return "lift";
+  const has = (terms: string[]) => terms.some((term) => text.includes(term));
+  if (/\b(run(?:ning)?|race|sprint|rush(?:ed|ing)?|chase(?:s|d|ing)?)\b/.test(text) || has(["ሮጥ", "መሮጥ", "እየሮጠ", "ተሯሯጠ", "يجري", "اركض", "ركض", "يركض", "مطاردة"])) return "run";
+  if (/\b(walk(?:s|ed|ing)?|travel(?:s|ed|ing)?|move(?:s|d|ing)?|journey|step(?:s|ped|ping)?|progress)\b/.test(text) || has(["ይራመድ", "መሄድ", "እየተራመደ", "ደረጃ", "ጉዞ", "يمشي", "يسير", "خطوة", "رحلة"])) return "walk";
+  if (/\b(wav(?:e|es|ed|ing)|welcome|greet(?:s|ed|ing)?|hello)\b/.test(text) || has(["ያውለበልባል", "እጅ ያውለበልባል", "ሰላም", "እንኳን ደህና", "يلوّح", "يلوح", "يرحب", "مرحبًا", "مرحبا"])) return "wave";
+  if (/\b(think(?:s|ing)?|consider(?:s|ed|ing)?|reflect(?:s|ed|ing)?|wonder(?:s|ed|ing)?|plan(?:s|ned|ning)?|decide(?:s|d|ing)?)\b/.test(text) || has(["ያስባል", "ማሰብ", "ያቅዳል", "እቅድ", "ይወስናል", "ማሰላሰል", "يفكر", "تأمل", "يتأمل", "يخطط", "خطة", "يقرر", "يتساءل"])) return "think";
+  if (/\b(celebrat(?:e|es|ed|ing)|success|win(?:s|ning)?|achiev(?:e|es|ed|ing)|breakthrough|milestone)\b/.test(text) || has(["ያከብራል", "በዓል", "ደስታ", "ስኬት", "ድል", "ተሳክቷል", "يحتفل", "احتفال", "نجاح", "فوز", "إنجاز", "انتصار"])) return "celebrate";
+  if (/\b(lift(?:s|ed|ing)?|rais(?:e|es|ed|ing)|carr(?:y|ies|ied|ying)|build(?:s|ing)|grow(?:s|ing|th)?|reach(?:es|ed|ing)?)\b/.test(text) || has(["ያነሳል", "ማንሳት", "ይገነባል", "ያድጋል", "ማደግ", "ይደርሳል", "يرفع", "ارفع", "يبني", "ينمو", "نمو", "يصل"])) return "lift";
   return "present";
 }
 
@@ -145,12 +148,19 @@ function sceneEnvironment(
   }
 }
 
-function textRows(lines: string[], x: number, y: number, fontSize: number, fill: string, weight: number): string {
+function languageFont(language: RenderInput["contentLanguage"]): string {
+  if (language === "am") return "Noto Sans Ethiopic";
+  if (language === "ar") return "Noto Naskh Arabic";
+  return "DejaVu Sans";
+}
+
+function textRows(lines: string[], x: number, y: number, fontSize: number, fill: string, weight: number, input: RenderInput, anchor = "start"): string {
   const gap = Math.round(fontSize * 1.24);
+  const direction = input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : "";
   return lines
     .map(
       (line, index) =>
-        `<text x="${x}" y="${y + index * gap}" fill="${fill}" font-family="DejaVu Sans, sans-serif" font-size="${fontSize}" font-weight="${weight}">${escapeXml(line)}</text>`,
+        `<text x="${x}" y="${y + index * gap}" text-anchor="${anchor}" ${direction} fill="${fill}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${fontSize}" font-weight="${weight}">${escapeXml(line)}</text>`,
     )
     .join("");
 }
@@ -161,7 +171,8 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const height = portrait ? 1280 : 720;
   const palette = STYLE_PALETTES[input.styleId] ?? STYLE_PALETTES.A2!;
   const scale = portrait ? 1 : 0.72;
-  const titleLines = wrapText(scene.title || `Scene ${index + 1}`, portrait ? 21 : 34, 2);
+  const sceneWord = input.contentLanguage === "am" ? "ትዕይንት" : input.contentLanguage === "ar" ? "مشهد" : "Scene";
+  const titleLines = wrapText(scene.title || `${sceneWord} ${index + 1}`, portrait ? 21 : 34, 2);
   const calloutLines = wrapText(scene.onScreenText || scene.visualMetaphor || "", portrait ? 29 : 54, 1);
   const titleY = portrait ? 175 : 138;
   const titleSize = portrait ? 48 : 47;
@@ -169,7 +180,10 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const stickX = portrait ? 355 : 855;
   const stickY = portrait ? 800 : 372;
   const propX = portrait ? 585 : 1005;
-  const frameLabel = `FRAME ${String(index + 1).padStart(2, "0")} · ${String(scene.seconds).padStart(2, "0")}s`;
+  const frameWord = input.contentLanguage === "am" ? "ትዕይንት" : input.contentLanguage === "ar" ? "مشهد" : "FRAME";
+  const frameLabel = `${frameWord} ${String(index + 1).padStart(2, "0")} · ${String(scene.seconds).padStart(2, "0")}s`;
+  const textX = input.contentLanguage === "ar" ? width - (portrait ? 50 : 82) : portrait ? 50 : 82;
+  const textAnchor = input.contentLanguage === "ar" ? "end" : "start";
   const context = contextForScene(scene, input.topic);
   const action = actionForScene(scene);
   const orbit = index % 2 === 0 ? -1 : 1;
@@ -205,7 +219,7 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
     ? { kneeX: 18 + legSwing * .55, kneeY: 125 - Math.max(0, -motion) * 15, footX: 31 + legSwing, footY: 168 - Math.max(0, -motion) * 25 }
     : { kneeX: 23, kneeY: 124, footX: 53, footY: 168 };
   const callout = calloutLines[0]
-    ? `<rect x="${portrait ? 54 : 85}" y="${calloutY - 44}" width="${width - (portrait ? 108 : 170)}" height="64" rx="20" fill="${palette.paper}" opacity=".83"/><text x="${portrait ? 84 : 118}" y="${calloutY}" fill="${palette.ink}" font-family="DejaVu Sans, sans-serif" font-size="${portrait ? 23 : 25}" font-weight="600">${escapeXml(calloutLines[0])}</text>`
+    ? `<rect x="${portrait ? 54 : 85}" y="${calloutY - 44}" width="${width - (portrait ? 108 : 170)}" height="64" rx="20" fill="${palette.paper}" opacity=".83"/><text x="${Math.round(width / 2)}" y="${calloutY}" text-anchor="middle" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 23 : 25}" font-weight="600">${escapeXml(calloutLines[0])}</text>`
     : "";
   const environment = sceneEnvironment(context, palette, index, width, height);
   const sceneProp = context === "technology"
@@ -228,8 +242,8 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   <circle cx="${portrait ? 588 : 1110}" cy="${portrait ? 255 : 170}" r="${sunRadius}" fill="${palette.accent}" opacity=".16"/>
   <path d="M0 ${portrait ? 940 : 510} Q${width * 0.35} ${portrait ? 870 : 455} ${width} ${portrait ? 965 : 545} V${height} H0Z" fill="${palette.field}" opacity=".78"/>
   ${environment}
-  <text x="${portrait ? 50 : 82}" y="${portrait ? 83 : 76}" fill="${palette.ink}" opacity=".68" font-family="DejaVu Sans, sans-serif" font-size="${portrait ? 17 : 16}" font-weight="700" letter-spacing="3">${escapeXml(frameLabel)}</text>
-  ${textRows(titleLines, portrait ? 50 : 82, titleY, titleSize, palette.ink, 700)}
+  <text x="${textX}" y="${portrait ? 83 : 76}" text-anchor="${textAnchor}" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" opacity=".68" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 17 : 16}" font-weight="700" letter-spacing="3">${escapeXml(frameLabel)}</text>
+  ${textRows(titleLines, textX, titleY, titleSize, palette.ink, 700, input, textAnchor)}
   ${callout}
   <g transform="translate(${stickX} ${stickY + bodyBob}) scale(${scale})">
     <ellipse cx="0" cy="190" rx="120" ry="22" fill="${palette.ink}" opacity=".12"/>
@@ -243,7 +257,7 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   <g transform="translate(${propX} ${portrait ? 795 : 344}) rotate(${propRotation})">
     ${sceneProp}
   </g>
-  <text x="${portrait ? 50 : 82}" y="${portrait ? 1220 : 690}" fill="${palette.ink}" opacity=".55" font-family="DejaVu Sans, sans-serif" font-size="${portrait ? 14 : 13}" font-weight="600" letter-spacing="2">${escapeXml(input.title.slice(0, 42).toUpperCase())}</text>
+  <text x="${textX}" y="${portrait ? 1220 : 690}" text-anchor="${textAnchor}" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" opacity=".55" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 14 : 13}" font-weight="600" letter-spacing="2">${escapeXml(input.title.slice(0, 42).toLocaleUpperCase(input.contentLanguage === "am" ? "am-ET" : input.contentLanguage))}</text>
 </svg>`;
 }
 
@@ -319,7 +333,7 @@ export async function renderStoryboardVideo(input: RenderInput): Promise<{ buffe
       }
       const audioBuffers = await batchProcess(
         input.scenes,
-        (scene) => textToSpeech(scene.narration.trim(), "alloy", "mp3"),
+        (scene) => textToSpeech(scene.narration.trim(), "alloy", "mp3", input.contentLanguage),
         { concurrency: 2, retries: 3, minTimeout: 1000, maxTimeout: 12000 },
       );
       for (const [index, scene] of input.scenes.entries()) {
@@ -349,6 +363,7 @@ export async function renderStoryboardVideo(input: RenderInput): Promise<{ buffe
           input.voiceover ? spokenDurations : input.scenes.map((scene) => scene.seconds),
           width,
           height,
+          input.contentLanguage,
         ),
         "utf8",
       );

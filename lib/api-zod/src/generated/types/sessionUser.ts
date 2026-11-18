@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LanguageCode } from './languageCode';
 import type { UserRole } from './userRole';
 
 export interface SessionUser {
@@ -13,4 +14,6 @@ export interface SessionUser {
   username: string;
   role: UserRole;
   mustChangePassword: boolean;
+  locale: LanguageCode;
+  contentLanguage: LanguageCode;
 }

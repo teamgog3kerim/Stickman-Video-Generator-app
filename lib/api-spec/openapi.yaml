@@ -142,6 +142,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /auth/preferences:
+    patch:
+      operationId: updateUserPreferences
+      tags: [auth]
+      summary: Save the account language preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPreferencesInput"
+      responses:
+        "200":
+          description: Updated account preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionUser"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /projects:
     get:
       operationId: listProjects
@@ -514,6 +538,9 @@ components:
     UserRole:
       type: string
       enum: [user, admin]
+    LanguageCode:
+      type: string
+      enum: [en, am, ar]
     SessionUser:
       type: object
       properties:
@@ -528,7 +555,11 @@ components:
           $ref: "#/components/schemas/UserRole"
         mustChangePassword:
           type: boolean
-      required: [id, fullName, username, role, mustChangePassword]
+        locale:
+          $ref: "#/components/schemas/LanguageCode"
+        contentLanguage:
+          $ref: "#/components/schemas/LanguageCode"
+      required: [id, fullName, username, role, mustChangePassword, locale, contentLanguage]
     SignUpInput:
       type: object
       properties:
@@ -548,7 +579,19 @@ components:
         bootstrapToken:
           type: string
           maxLength: 256
+        locale:
+          $ref: "#/components/schemas/LanguageCode"
+        contentLanguage:
+          $ref: "#/components/schemas/LanguageCode"
       required: [fullName, username, password]
+    UserPreferencesInput:
+      type: object
+      properties:
+        locale:
+          $ref: "#/components/schemas/LanguageCode"
+        contentLanguage:
+          $ref: "#/components/schemas/LanguageCode"
+      required: [locale, contentLanguage]
     LoginInput:
       type: object
       properties:
@@ -636,6 +679,8 @@ components:
           type: boolean
         soundEffects:
           type: boolean
+        contentLanguage:
+          $ref: "#/components/schemas/LanguageCode"
         scenes:
           type: array
           maxItems: 40
@@ -654,6 +699,7 @@ components:
         - voiceover
         - subtitles
         - soundEffects
+        - contentLanguage
         - scenes
     Project:
       allOf:
@@ -693,7 +739,9 @@ components:
           type: integer
           minimum: 15
           maximum: 600
-      required: [topic, styleId, aspectRatio, durationSeconds]
+        contentLanguage:
+          $ref: "#/components/schemas/LanguageCode"
+      required: [topic, styleId, aspectRatio, durationSeconds, contentLanguage]
     StoryboardDraft:
       type: object
       properties:
@@ -735,6 +783,8 @@ components:
         aspectRatio:
           type: string
           enum: ["16:9", "9:16"]
+        contentLanguage:
+          $ref: "#/components/schemas/LanguageCode"
         durationSeconds:
           type: integer
         fileName:
@@ -744,7 +794,7 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, projectId, title, topic, aspectRatio, durationSeconds, fileName, byteSize, createdAt]
+      required: [id, projectId, title, topic, aspectRatio, contentLanguage, durationSeconds, fileName, byteSize, createdAt]
     SocialSharePlatformCopy:
       type: object
       properties:

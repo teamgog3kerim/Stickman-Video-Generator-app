@@ -16,6 +16,7 @@ export const renderedVideosTable = pgTable(
     topic: text("topic").notNull().default(""),
     contentContext: text("content_context").notNull().default(""),
     aspectRatio: text("aspect_ratio").$type<"16:9" | "9:16">().notNull(),
+    contentLanguage: text("content_language").$type<"en" | "am" | "ar">().notNull().default("en"),
     durationSeconds: integer("duration_seconds").notNull(),
     fileName: text("file_name").notNull(),
     objectPath: text("object_path").notNull().unique(),

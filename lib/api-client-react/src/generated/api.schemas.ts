@@ -21,12 +21,23 @@ export const UserRole = {
   admin: 'admin',
 } as const;
 
+export type LanguageCode = typeof LanguageCode[keyof typeof LanguageCode];
+
+
+export const LanguageCode = {
+  en: 'en',
+  am: 'am',
+  ar: 'ar',
+} as const;
+
 export interface SessionUser {
   id: string;
   fullName: string;
   username: string;
   role: UserRole;
   mustChangePassword: boolean;
+  locale: LanguageCode;
+  contentLanguage: LanguageCode;
 }
 
 export interface SignUpInput {
@@ -48,6 +59,13 @@ export interface SignUpInput {
   password: string;
   /** @maxLength 256 */
   bootstrapToken?: string;
+  locale?: LanguageCode;
+  contentLanguage?: LanguageCode;
+}
+
+export interface UserPreferencesInput {
+  locale: LanguageCode;
+  contentLanguage: LanguageCode;
 }
 
 export interface LoginInput {
@@ -132,6 +150,7 @@ export interface ProjectInput {
   voiceover: boolean;
   subtitles: boolean;
   soundEffects: boolean;
+  contentLanguage: LanguageCode;
   /** @maxItems 40 */
   scenes: Scene[];
 }
@@ -168,6 +187,7 @@ export interface StoryboardGenerateInput {
      * @maximum 600
      */
   durationSeconds: number;
+  contentLanguage: LanguageCode;
 }
 
 export interface StoryboardDraft {
@@ -201,6 +221,7 @@ export interface DownloadedVideo {
   title: string;
   topic: string;
   aspectRatio: DownloadedVideoAspectRatio;
+  contentLanguage: LanguageCode;
   durationSeconds: number;
   fileName: string;
   byteSize: number;

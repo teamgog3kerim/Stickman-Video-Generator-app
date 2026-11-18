@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LanguageCode } from './languageCode';
 import type { StoryboardGenerateInputAspectRatio } from './storyboardGenerateInputAspectRatio';
 
 export interface StoryboardGenerateInput {
@@ -23,4 +24,5 @@ export interface StoryboardGenerateInput {
      * @maximum 600
      */
   durationSeconds: number;
+  contentLanguage: LanguageCode;
 }

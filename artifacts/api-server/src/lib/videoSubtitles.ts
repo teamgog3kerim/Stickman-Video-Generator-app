@@ -3,6 +3,8 @@ type CaptionScene = {
   seconds: number;
 };
 
+type CaptionLanguage = "en" | "am" | "ar";
+
 function assTime(seconds: number): string {
   const centiseconds = Math.max(0, Math.round(seconds * 100));
   const hours = Math.floor(centiseconds / 360000);
@@ -27,7 +29,7 @@ function captionChunks(text: string, maxWords: number): string[][] {
   let current: string[] = [];
   for (const word of words) {
     current.push(word);
-    const sentenceEnds = /[.!?]["')\]]?$/.test(word);
+    const sentenceEnds = /[.!?؟؛]["')\]]?$/.test(word);
     if (current.length >= maxWords || (sentenceEnds && current.length >= 3)) {
       chunks.push(current);
       current = [];
@@ -42,6 +44,7 @@ export function buildVoiceoverSubtitles(
   spokenDurations: number[],
   width: number,
   height: number,
+  language: CaptionLanguage = "en",
 ): string {
   const portrait = height > width;
   const fontSize = portrait ? 40 : 44;
@@ -49,6 +52,7 @@ export function buildVoiceoverSubtitles(
   const captionY = Math.round(height * (portrait ? 0.87 : 0.86));
   const entryY = captionY + (portrait ? 24 : 18);
   const maxWords = portrait ? 5 : 7;
+  const fontName = language === "am" ? "Noto Sans Ethiopic" : language === "ar" ? "Noto Naskh Arabic" : "DejaVu Sans";
   const events: string[] = [];
   let sceneStart = 0;
 
@@ -60,7 +64,7 @@ export function buildVoiceoverSubtitles(
     let wordOffset = 0;
 
     for (const phrase of phrases) {
-      const phraseWeight = phrase.reduce((total, word) => total + Math.max(2, word.replace(/\W/g, "").length), 0);
+      const phraseWeight = phrase.reduce((total, word) => total + Math.max(2, (word.match(/[\p{L}\p{N}]/gu) ?? []).length), 0);
       const remainingWeight = phraseWeight;
       const start = sceneStart + (wordOffset / totalWords) * spokenDuration;
       wordOffset += phrase.length;
@@ -68,7 +72,7 @@ export function buildVoiceoverSubtitles(
       let usedCentiseconds = 0;
       const phraseDuration = Math.max(0.2, end - start);
       const karaokeWords = phrase.map((word, wordIndex) => {
-        const weight = Math.max(2, word.replace(/\W/g, "").length);
+        const weight = Math.max(2, (word.match(/[\p{L}\p{N}]/gu) ?? []).length);
         const centiseconds = wordIndex === phrase.length - 1
           ? Math.max(1, Math.round(phraseDuration * 100) - usedCentiseconds)
           : Math.max(1, Math.round((phraseDuration * weight / remainingWeight) * 100));
@@ -93,7 +97,7 @@ export function buildVoiceoverSubtitles(
     "",
     "[V4+ Styles]",
     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-    `Style: Voiceover,DejaVu Sans,${fontSize},&H00FFF8F0,&H00007CE2,&H0025303A,&H8025303A,-1,0,1,3,2,2,44,44,80,1`,
+    `Style: Voiceover,${fontName},${fontSize},&H00FFF8F0,&H00007CE2,&H0025303A,&H8025303A,-1,0,1,3,2,2,44,44,80,1`,
     "",
     "[Events]",
     "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",

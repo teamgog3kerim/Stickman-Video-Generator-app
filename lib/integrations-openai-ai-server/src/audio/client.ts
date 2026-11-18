@@ -160,15 +160,17 @@ export async function voiceChatStream(
 export async function textToSpeech(
   text: string,
   voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer" = "alloy",
-  format: "wav" | "mp3" | "flac" | "opus" | "pcm16" = "wav"
+  format: "wav" | "mp3" | "flac" | "opus" | "pcm16" = "wav",
+  language: "en" | "am" | "ar" = "en",
 ): Promise<Buffer> {
+  const languageName = language === "am" ? "Amharic" : language === "ar" ? "Arabic" : "English";
   const response = await openai.chat.completions.create({
     model: "gpt-audio",
     modalities: ["text", "audio"],
     audio: { voice, format },
     messages: [
-      { role: "system", content: "You are an assistant that performs text-to-speech." },
-      { role: "user", content: `Repeat the following text verbatim: ${text}` },
+      { role: "system", content: `You are a professional ${languageName} narrator. Speak naturally in ${languageName}, preserve the source text verbatim, and never translate or paraphrase it.` },
+      { role: "user", content: `Read this ${languageName} narration exactly as written: ${text}` },
     ],
   });
   const audioData = (response.choices[0]?.message as any)?.audio?.data ?? "";

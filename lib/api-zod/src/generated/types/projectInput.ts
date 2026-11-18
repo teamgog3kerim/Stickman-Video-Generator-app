@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LanguageCode } from './languageCode';
 import type { ProjectInputAspectRatio } from './projectInputAspectRatio';
 import type { ProjectInputEngine } from './projectInputEngine';
 import type { Scene } from './scene';
@@ -32,6 +33,7 @@ export interface ProjectInput {
   voiceover: boolean;
   subtitles: boolean;
   soundEffects: boolean;
+  contentLanguage: LanguageCode;
   /** @maxItems 40 */
   scenes: Scene[];
 }

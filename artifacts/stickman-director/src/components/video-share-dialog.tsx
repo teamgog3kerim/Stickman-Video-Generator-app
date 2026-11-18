@@ -3,6 +3,7 @@ import { Copy, Download, ExternalLink, Film, Instagram, Sparkles, Youtube } from
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useGenerateVideoShareCopy } from "@workspace/api-client-react";
 import type { DownloadedVideo, SocialSharePlatformCopy } from "@workspace/api-client-react";
+import { translateActive } from "@/lib/i18n";
 import "./video-share.css";
 
 type Platform = SocialSharePlatformCopy["platform"];
@@ -48,6 +49,7 @@ export function VideoShareDialog({
   notify: (message: string) => void;
 }) {
   const generate = useGenerateVideoShareCopy();
+  const t = translateActive;
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [generatedFor, setGeneratedFor] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
@@ -80,9 +82,9 @@ export function VideoShareDialog({
     if (!copy) return;
     try {
       await copyToClipboard(makeShareText(copy, caption, hashtags));
-      notify("Caption and hashtags copied");
+      notify(t("Caption and hashtags copied"));
     } catch {
-      notify("Could not copy share text. Select and copy it manually.");
+      notify(t("Could not copy share text. Select and copy it manually."));
     }
   };
 
@@ -101,10 +103,10 @@ export function VideoShareDialog({
       {video && (
         <DialogContent className="director-dialog share-dialog" data-testid="dialog-video-share">
           <DialogHeader className="director-dialog-header share-dialog-header">
-            <span className="mono share-kicker"><Sparkles size={12}/> PREVIEW & GUIDED SHARING</span>
-            <DialogTitle className="director-dialog-title">{video.title || "Rendered video"}</DialogTitle>
+            <span className="mono share-kicker"><Sparkles size={12}/> {t("PREVIEW & GUIDED SHARING")}</span>
+            <DialogTitle className="director-dialog-title">{video.title || t("Rendered video")}</DialogTitle>
             <DialogDescription className="director-dialog-copy">
-              Preview your MP4, choose a platform, and prepare its caption and hashtags.
+              {t("Preview your MP4, choose a platform, and prepare its caption and hashtags.")}
             </DialogDescription>
           </DialogHeader>
 
@@ -116,7 +118,7 @@ export function VideoShareDialog({
                 playsInline
                 preload="metadata"
                 src={`/api/videos/downloads/${video.id}/preview`}
-                aria-label={`Preview of ${video.title}`}
+                aria-label={`${t("Preview of")} ${video.title}`}
                 data-testid="video-saved-preview"
               />
               <div className="share-video-meta mono">
@@ -124,13 +126,13 @@ export function VideoShareDialog({
                 <span>{new Date(video.createdAt).toLocaleDateString()}</span>
               </div>
               <a className="btn btn-outline share-download" href={`/api/videos/downloads/${video.id}/file`} data-testid="button-share-download">
-                <Download size={14}/>Download MP4
+                <Download size={14}/>{t("Download MP4")}
               </a>
             </div>
 
             <div className="share-copy-column">
-              <span className="field-label">Choose a platform</span>
-              <div className="share-platforms" role="tablist" aria-label="Social platforms">
+              <span className="field-label">{t("Choose a platform")}</span>
+              <div className="share-platforms" role="tablist" aria-label={t("Social platforms")}>
                 {platforms.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -151,24 +153,24 @@ export function VideoShareDialog({
 
               {!copy && !generate.isPending && !generate.isError && (
                 <div className="share-copy-intro" data-testid="panel-share-copy-intro">
-                  <p>Generate a caption and relevant hashtags for all three platforms. This uses Replit AI credits; suggestions are not live trend rankings.</p>
-                  <button type="button" className="btn btn-primary" data-testid="button-generate-share-copy" onClick={generateCopy}><Sparkles size={14}/>Generate captions & hashtags</button>
+                  <p>{t("Generate a caption and relevant hashtags for all three platforms. This uses Replit AI credits; suggestions are not live trend rankings.")}</p>
+                  <button type="button" className="btn btn-primary" data-testid="button-generate-share-copy" onClick={generateCopy}><Sparkles size={14}/>{t("Generate captions & hashtags")}</button>
                 </div>
               )}
-              {generate.isPending && <div className="share-loading" role="status" data-testid="status-share-copy-loading"><i/><span>Writing platform-specific share copy…</span></div>}
+              {generate.isPending && <div className="share-loading" role="status" data-testid="status-share-copy-loading"><i/><span>{t("Writing platform-specific share copy…")}</span></div>}
               {generate.isError && (
                 <div className="share-copy-error" role="alert" data-testid="status-share-copy-error">
-                  <p>Could not generate captions and hashtags.</p>
-                  <button type="button" className="text-link" data-testid="button-retry-share-copy" onClick={generateCopy}>Try again</button>
+                  <p>{t("Could not generate captions and hashtags.")}</p>
+                  <button type="button" className="text-link" data-testid="button-retry-share-copy" onClick={generateCopy}>{t("Try again")}</button>
                 </div>
               )}
 
               {copy && (
                 <>
-                  {platform === "youtube" && <label className="share-field">Video title<input value={copy.title} readOnly aria-label="Suggested YouTube title"/></label>}
-                  <label className="share-field">Caption<textarea value={caption} maxLength={1600} onChange={(event) => setCaption(event.target.value)} data-testid="input-share-caption"/></label>
+                  {platform === "youtube" && <label className="share-field">{t("Video title")}<input value={copy.title} readOnly aria-label={t("Suggested YouTube title")}/></label>}
+                  <label className="share-field">{t("Caption")}<textarea value={caption} maxLength={1600} onChange={(event) => setCaption(event.target.value)} data-testid="input-share-caption"/></label>
                   <div className="share-tags-field">
-                    <div className="share-tags-heading"><span className="field-label">Suggested hashtags</span><small>Tap tags to include or exclude</small></div>
+                    <div className="share-tags-heading"><span className="field-label">{t("Suggested hashtags")}</span><small>{t("Tap tags to include or exclude")}</small></div>
                     <div className="share-tags">
                       {copy.hashtags.map((tag) => (
                         <button
@@ -183,12 +185,12 @@ export function VideoShareDialog({
                       ))}
                     </div>
                   </div>
-                  <small className="share-note" data-testid="note-share-trends">AI creates relevance-focused suggestions with Replit AI credits. They are not live trend rankings.</small>
+                  <small className="share-note" data-testid="note-share-trends">{t("AI creates relevance-focused suggestions with Replit AI credits. They are not live trend rankings.")}</small>
                   <div className="share-actions">
-                    <button type="button" className="btn btn-outline" data-testid="button-copy-share-text" onClick={copyShareText}><Copy size={14}/>Copy share text</button>
-                    <button type="button" className="btn btn-primary" data-testid="button-open-social-platform" onClick={openPlatform}><ExternalLink size={14}/>Open {platforms.find((item) => item.id === platform)?.label}</button>
+                    <button type="button" className="btn btn-outline" data-testid="button-copy-share-text" onClick={copyShareText}><Copy size={14}/>{t("Copy share text")}</button>
+                    <button type="button" className="btn btn-primary" data-testid="button-open-social-platform" onClick={openPlatform}><ExternalLink size={14}/>{t("Open")} {platforms.find((item) => item.id === platform)?.label}</button>
                   </div>
-                  <p className="share-upload-note">OAuth is not connected in this app. Upload the MP4 on the platform page after copying your text.</p>
+                  <p className="share-upload-note">{t("OAuth is not connected in this app. Upload the MP4 on the platform page after copying your text.")}</p>
                 </>
               )}
             </div>

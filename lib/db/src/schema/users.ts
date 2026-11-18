@@ -9,6 +9,8 @@ export const usersTable = pgTable("app_users", {
   passwordHash: text("password_hash").notNull(),
   passwordSalt: text("password_salt").notNull(),
   role: text("role").$type<"user" | "admin">().notNull().default("user"),
+  locale: text("locale").$type<"en" | "am" | "ar">().notNull().default("en"),
+  contentLanguage: text("content_language").$type<"en" | "am" | "ar">().notNull().default("en"),
   isActive: boolean("is_active").notNull().default(true),
   mustChangePassword: boolean("must_change_password").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

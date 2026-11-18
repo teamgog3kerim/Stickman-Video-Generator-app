@@ -38,7 +38,9 @@ export const SignUpBody = zod.object({
   "fullName": zod.string().min(1).max(signUpBodyFullNameMax),
   "username": zod.string().min(signUpBodyUsernameMin).max(signUpBodyUsernameMax).regex(signUpBodyUsernameRegExp),
   "password": zod.string().min(signUpBodyPasswordMin).max(signUpBodyPasswordMax),
-  "bootstrapToken": zod.string().max(signUpBodyBootstrapTokenMax).optional()
+  "bootstrapToken": zod.string().max(signUpBodyBootstrapTokenMax).optional(),
+  "locale": zod.enum(['en', 'am', 'ar']).optional(),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']).optional()
 })
 
 export const SignUpResponse = zod.object({
@@ -46,7 +48,9 @@ export const SignUpResponse = zod.object({
   "fullName": zod.string(),
   "username": zod.string(),
   "role": zod.enum(['user', 'admin']),
-  "mustChangePassword": zod.boolean()
+  "mustChangePassword": zod.boolean(),
+  "locale": zod.enum(['en', 'am', 'ar']),
+  "contentLanguage": zod.enum(['en', 'am', 'ar'])
 })
 
 
@@ -70,7 +74,9 @@ export const LogInResponse = zod.object({
   "fullName": zod.string(),
   "username": zod.string(),
   "role": zod.enum(['user', 'admin']),
-  "mustChangePassword": zod.boolean()
+  "mustChangePassword": zod.boolean(),
+  "locale": zod.enum(['en', 'am', 'ar']),
+  "contentLanguage": zod.enum(['en', 'am', 'ar'])
 })
 
 
@@ -88,7 +94,9 @@ export const GetCurrentUserResponse = zod.object({
   "fullName": zod.string(),
   "username": zod.string(),
   "role": zod.enum(['user', 'admin']),
-  "mustChangePassword": zod.boolean()
+  "mustChangePassword": zod.boolean(),
+  "locale": zod.enum(['en', 'am', 'ar']),
+  "contentLanguage": zod.enum(['en', 'am', 'ar'])
 })
 
 
@@ -108,6 +116,25 @@ export const ChangePasswordBody = zod.object({
 })
 
 export const ChangePasswordResponse = zod.void()
+
+
+/**
+ * @summary Save the account language preferences
+ */
+export const UpdateUserPreferencesBody = zod.object({
+  "locale": zod.enum(['en', 'am', 'ar']),
+  "contentLanguage": zod.enum(['en', 'am', 'ar'])
+})
+
+export const UpdateUserPreferencesResponse = zod.object({
+  "id": zod.string().uuid(),
+  "fullName": zod.string(),
+  "username": zod.string(),
+  "role": zod.enum(['user', 'admin']),
+  "mustChangePassword": zod.boolean(),
+  "locale": zod.enum(['en', 'am', 'ar']),
+  "contentLanguage": zod.enum(['en', 'am', 'ar'])
+})
 
 
 /**
@@ -147,6 +174,7 @@ export const ListProjectsResponseItem = zod.object({
   "voiceover": zod.boolean(),
   "subtitles": zod.boolean(),
   "soundEffects": zod.boolean(),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
   "scenes": zod.array(zod.object({
   "id": zod.string(),
   "title": zod.string(),
@@ -205,6 +233,7 @@ export const CreateProjectBody = zod.object({
   "voiceover": zod.boolean(),
   "subtitles": zod.boolean(),
   "soundEffects": zod.boolean(),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
   "scenes": zod.array(zod.object({
   "id": zod.string(),
   "title": zod.string(),
@@ -253,6 +282,7 @@ export const CreateProjectResponse = zod.object({
   "voiceover": zod.boolean(),
   "subtitles": zod.boolean(),
   "soundEffects": zod.boolean(),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
   "scenes": zod.array(zod.object({
   "id": zod.string(),
   "title": zod.string(),
@@ -314,6 +344,7 @@ export const UpdateProjectBody = zod.object({
   "voiceover": zod.boolean(),
   "subtitles": zod.boolean(),
   "soundEffects": zod.boolean(),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
   "scenes": zod.array(zod.object({
   "id": zod.string(),
   "title": zod.string(),
@@ -362,6 +393,7 @@ export const UpdateProjectResponse = zod.object({
   "voiceover": zod.boolean(),
   "subtitles": zod.boolean(),
   "soundEffects": zod.boolean(),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
   "scenes": zod.array(zod.object({
   "id": zod.string(),
   "title": zod.string(),
@@ -423,6 +455,7 @@ export const ApproveProjectResponse = zod.object({
   "voiceover": zod.boolean(),
   "subtitles": zod.boolean(),
   "soundEffects": zod.boolean(),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
   "scenes": zod.array(zod.object({
   "id": zod.string(),
   "title": zod.string(),
@@ -473,7 +506,8 @@ export const GenerateStoryboardBody = zod.object({
   "sourceScript": zod.string().max(generateStoryboardBodySourceScriptMax).optional(),
   "styleId": zod.string().max(generateStoryboardBodyStyleIdMax),
   "aspectRatio": zod.enum(['16:9', '9:16']),
-  "durationSeconds": zod.number().int().min(generateStoryboardBodyDurationSecondsMin).max(generateStoryboardBodyDurationSecondsMax)
+  "durationSeconds": zod.number().int().min(generateStoryboardBodyDurationSecondsMin).max(generateStoryboardBodyDurationSecondsMax),
+  "contentLanguage": zod.enum(['en', 'am', 'ar'])
 })
 
 export const generateStoryboardResponseScenesItemSecondsMax = 90;
@@ -522,6 +556,7 @@ export const ListDownloadedVideosResponseItem = zod.object({
   "title": zod.string(),
   "topic": zod.string(),
   "aspectRatio": zod.enum(['16:9', '9:16']),
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
   "durationSeconds": zod.number().int(),
   "fileName": zod.string(),
   "byteSize": zod.number().int(),
