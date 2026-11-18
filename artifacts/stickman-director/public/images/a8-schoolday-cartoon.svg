@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#f6e7b8"/>
+  <rect y="235" width="640" height="125" fill="#d5a66f"/>
+  <path d="M0 236h640" stroke="#483c35" stroke-width="8"/>
+  <rect x="35" y="35" width="270" height="168" rx="8" fill="#285c53" stroke="#403831" stroke-width="9"/>
+  <path d="M59 78h136m-136 27h96m-96 27h123m-123 27h77" stroke="#e9e2c9" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+  <rect x="424" y="42" width="165" height="126" rx="8" fill="#d5eff1" stroke="#49413a" stroke-width="9"/>
+  <path d="M506 44v120m-79-59h158" stroke="#fffaf0" stroke-width="8"/>
+  <circle cx="504" cy="94" r="24" fill="#f9bd4a"/>
+  <g stroke="#483a35" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M160 282v48m35-48v48m-35-5h-16m51 5h17m-34-107v45m0-27-33 19m33-19 33 14"/>
+    <path d="M335 285v45m34-45v45m-34-4h-17m51 4h17m-34-110v49m0-26-32 22m32-22 34 7"/>
+    <path d="M510 286v44m33-44v44m-33-4h-16m49 4h16m-33-108v48m0-27-29 20m29-20 34 12"/>
+  </g>
+  <path d="M146 196q29-21 58 0v55h-58z" fill="#e9784f" stroke="#483a35" stroke-width="7"/>
+  <path d="M321 200q30-22 60 0v53h-60z" fill="#4d8cbc" stroke="#483a35" stroke-width="7"/>
+  <path d="M493 202q28-21 55 0v52h-55z" fill="#7aa66d" stroke="#483a35" stroke-width="7"/>
+  <g fill="#ffdf70" stroke="#403831" stroke-width="7">
+    <circle cx="176" cy="179" r="37"/><circle cx="351" cy="182" r="36"/><circle cx="521" cy="184" r="35"/>
+  </g>
+  <g fill="#403831">
+    <circle cx="165" cy="176" r="4"/><circle cx="185" cy="176" r="4"/><circle cx="340" cy="180" r="4"/><circle cx="360" cy="180" r="4"/><circle cx="511" cy="182" r="4"/><circle cx="530" cy="182" r="4"/>
+  </g>
+  <g fill="none" stroke="#403831" stroke-width="4" stroke-linecap="round"><path d="M166 191q10 11 20 0m164 1q10 10 20 0m161 1q10 10 20 0"/></g>
+  <path d="M128 257h95m152 4h76m82-2h74" stroke="#665143" stroke-width="10" stroke-linecap="round"/>
+  <path d="M143 262v25m66-25v25m146-22v25m66-25v25m93-26v25m62-25v25" stroke="#665143" stroke-width="7"/>
+</svg>

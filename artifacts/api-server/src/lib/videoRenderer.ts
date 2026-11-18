@@ -37,6 +37,9 @@ const STYLE_PALETTES: Record<string, { paper: string; ink: string; accent: strin
   A5: { paper: "#f3e8d0", ink: "#34363a", accent: "#c36546", field: "#d7ddc9" },
   A6: { paper: "#26323b", ink: "#f3e9d3", accent: "#e1a35b", field: "#45515a" },
   A7: { paper: "#f3e4c8", ink: "#313641", accent: "#d6674c", field: "#e0c99f" },
+  A8: { paper: "#f6e7b8", ink: "#403831", accent: "#e9784f", field: "#c6dfd1" },
+  A9: { paper: "#f8edda", ink: "#39494a", accent: "#e97855", field: "#bdd5cb" },
+  A10: { paper: "#f4e9fb", ink: "#2d3942", accent: "#e56c4d", field: "#c3ddce" },
   B1: { paper: "#f1eee6", ink: "#263239", accent: "#d97151", field: "#d9e4dd" },
   B2: { paper: "#f8ebd3", ink: "#283238", accent: "#e26745", field: "#cfe4d8" },
   B3: { paper: "#d9e0d0", ink: "#29333a", accent: "#b85c47", field: "#b8c4b4" },
@@ -44,11 +47,14 @@ const STYLE_PALETTES: Record<string, { paper: string; ink: string; accent: strin
   B5: { paper: "#eee9db", ink: "#27353b", accent: "#c96d4c", field: "#d1e0d4" },
   B6: { paper: "#333447", ink: "#fff0d1", accent: "#ff9b5f", field: "#5f5365" },
   B7: { paper: "#263747", ink: "#e7f4d5", accent: "#f38b59", field: "#3e6470" },
+  B8: { paper: "#f8e8d2", ink: "#39463e", accent: "#d87858", field: "#9bbc8a" },
+  B9: { paper: "#d8edf1", ink: "#3d4c4d", accent: "#e66f52", field: "#b5c9bd" },
 };
+const CARTOON_STYLE_IDS = new Set(["A8", "A9", "A10", "B8", "B9"]);
 const FPS = 24;
 const POSE_FRAMES = 24;
 
-type SceneContext = "nature" | "finance" | "technology" | "science" | "health" | "learning" | "food" | "city" | "studio";
+type SceneContext = "nature" | "finance" | "technology" | "science" | "health" | "learning" | "food" | "city" | "classroom" | "mall" | "home" | "office" | "park" | "studio";
 type StickmanAction = "walk" | "run" | "wave" | "think" | "celebrate" | "lift" | "present";
 
 function escapeXml(value: string): string {

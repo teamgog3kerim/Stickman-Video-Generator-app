@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#f4e9fb"/>
+  <path d="M0 267q155-70 317-9t323 0v102H0z" fill="#c3ddce"/>
+  <path d="M46 94l22-39 18 40 43 7-32 29 8 42-37-21-39 20 9-42-32-30z" fill="#ffd64f" stroke="#2d3942" stroke-width="6"/>
+  <path d="M540 79l16-29 14 31 34 6-25 23 7 34-30-18-31 17 7-34-25-24z" fill="#f58b68" stroke="#2d3942" stroke-width="6"/>
+  <rect x="217" y="47" width="206" height="61" rx="25" fill="#fffdf6" stroke="#2d3942" stroke-width="6"/>
+  <path d="M269 108l-14 20 36-18" fill="#fffdf6" stroke="#2d3942" stroke-width="6" stroke-linejoin="round"/>
+  <text x="320" y="88" text-anchor="middle" font-family="sans-serif" font-size="23" font-weight="900" fill="#e56c4d">WAIT... WHAT?</text>
+  <g stroke="#2d3942" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M153 279v48m32-48v48m-32-4h-16m48 4h16m-32-104v47m0-23-33 23m33-23 34-32"/>
+    <path d="M306 280v47m32-47v47m-32-4h-16m48 4h16m-32-106v47m0-24-34-27m34 27 35 18"/>
+    <path d="M463 279v48m32-48v48m-32-4h-16m48 4h16m-32-105v48m0-26-31 7m31-7 31-26"/>
+  </g>
+  <g fill="#ffd84f" stroke="#2d3942" stroke-width="7"><circle cx="169" cy="185" r="35"/><circle cx="322" cy="186" r="35"/><circle cx="479" cy="184" r="35"/></g>
+  <g fill="#2d3942"><circle cx="158" cy="181" r="5"/><circle cx="178" cy="181" r="5"/><circle cx="311" cy="183" r="5"/><circle cx="331" cy="183" r="5"/><circle cx="468" cy="181" r="5"/><circle cx="488" cy="181" r="5"/></g>
+  <path d="M158 204q11 10 22 0m-1-4q11 13 22 0m127 4q10 10 21 0m-2-4q11 13 22 0m126 0q10 14 21 0" fill="none" stroke="#2d3942" stroke-width="4" stroke-linecap="round"/>
+  <path d="M136 210q34-24 67 0v46h-67z" fill="#4e86bb" stroke="#2d3942" stroke-width="6"/>
+  <path d="M290 211q34-23 67 0v46h-67z" fill="#f07859" stroke="#2d3942" stroke-width="6"/>
+  <path d="M447 210q34-23 67 0v46h-67z" fill="#6ea77d" stroke="#2d3942" stroke-width="6"/>
+  <path d="M126 168q25-49 54-18m126-13q22-36 48 0m128-14q27-30 52 3" fill="none" stroke="#2d3942" stroke-width="7" stroke-linecap="round"/>
+</svg>
