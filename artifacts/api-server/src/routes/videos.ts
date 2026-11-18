@@ -60,7 +60,11 @@ router.post("/videos/render", async (req, res): Promise<void> => {
     res.send(rendered.buffer);
   } catch (error) {
     req.log.error(
-      { errorName: error instanceof Error ? error.name : "UnknownError" },
+      {
+        errorName: error instanceof Error ? error.name : "UnknownError",
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      },
       "Video render failed",
     );
     res.status(500).json({ error: "Video rendering failed. Check the brief and try again." });
