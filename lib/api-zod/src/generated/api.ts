@@ -159,6 +159,18 @@ export const listProjectsResponseOneScenesItemSecondsMax = 90;
 
 export const listProjectsResponseOneScenesMax = 40;
 
+export const listProjectsResponseOneCartoonCastItemIdMax = 64;
+
+export const listProjectsResponseOneCartoonCastItemNameMax = 40;
+
+export const listProjectsResponseOneCartoonCastItemRoleMax = 60;
+
+export const listProjectsResponseOneCartoonCastItemPersonalityMax = 120;
+
+export const listProjectsResponseOneCartoonCastItemShirtColorRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const listProjectsResponseOneCartoonCastItemSkinToneRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const listProjectsResponseOneCartoonCastMax = 5;
+
 
 
 export const ListProjectsResponseItem = zod.object({
@@ -185,8 +197,22 @@ export const ListProjectsResponseItem = zod.object({
   "visualMetaphor": zod.string().optional(),
   "onScreenText": zod.string().optional(),
   "cameraMove": zod.string().optional(),
-  "soundCue": zod.string().optional()
-})).max(listProjectsResponseOneScenesMax)
+  "soundCue": zod.string().optional(),
+  "entrance": zod.enum(['already-on-stage', 'walk-in-left', 'walk-in-right', 'run-in-left', 'run-in-right', 'pop-in']).optional(),
+  "groupAction": zod.enum(['story-directed', 'talk-and-react', 'walk-together', 'point-together', 'celebrate-together']).optional(),
+  "exit": zod.enum(['hold', 'walk-off-left', 'walk-off-right', 'run-off-left', 'run-off-right', 'exit-together']).optional(),
+  "transitionToNext": zod.enum(['cut', 'dissolve', 'wipe-left', 'wipe-right', 'match-left', 'match-right']).optional()
+})).max(listProjectsResponseOneScenesMax),
+  "cartoonCast": zod.array(zod.object({
+  "id": zod.string().max(listProjectsResponseOneCartoonCastItemIdMax),
+  "name": zod.string().max(listProjectsResponseOneCartoonCastItemNameMax),
+  "role": zod.string().max(listProjectsResponseOneCartoonCastItemRoleMax),
+  "personality": zod.string().max(listProjectsResponseOneCartoonCastItemPersonalityMax).optional(),
+  "shirtColor": zod.string().regex(listProjectsResponseOneCartoonCastItemShirtColorRegExp),
+  "skinTone": zod.string().regex(listProjectsResponseOneCartoonCastItemSkinToneRegExp),
+  "hairStyle": zod.enum(['short', 'curly', 'long']),
+  "accessory": zod.enum(['none', 'cap', 'glasses', 'headband', 'backpack', 'bow'])
+})).max(listProjectsResponseOneCartoonCastMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "createdAt": zod.coerce.date(),
@@ -218,6 +244,18 @@ export const createProjectBodyScenesItemSecondsMax = 90;
 
 export const createProjectBodyScenesMax = 40;
 
+export const createProjectBodyCartoonCastItemIdMax = 64;
+
+export const createProjectBodyCartoonCastItemNameMax = 40;
+
+export const createProjectBodyCartoonCastItemRoleMax = 60;
+
+export const createProjectBodyCartoonCastItemPersonalityMax = 120;
+
+export const createProjectBodyCartoonCastItemShirtColorRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const createProjectBodyCartoonCastItemSkinToneRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const createProjectBodyCartoonCastMax = 5;
+
 
 
 export const CreateProjectBody = zod.object({
@@ -244,8 +282,22 @@ export const CreateProjectBody = zod.object({
   "visualMetaphor": zod.string().optional(),
   "onScreenText": zod.string().optional(),
   "cameraMove": zod.string().optional(),
-  "soundCue": zod.string().optional()
-})).max(createProjectBodyScenesMax)
+  "soundCue": zod.string().optional(),
+  "entrance": zod.enum(['already-on-stage', 'walk-in-left', 'walk-in-right', 'run-in-left', 'run-in-right', 'pop-in']).optional(),
+  "groupAction": zod.enum(['story-directed', 'talk-and-react', 'walk-together', 'point-together', 'celebrate-together']).optional(),
+  "exit": zod.enum(['hold', 'walk-off-left', 'walk-off-right', 'run-off-left', 'run-off-right', 'exit-together']).optional(),
+  "transitionToNext": zod.enum(['cut', 'dissolve', 'wipe-left', 'wipe-right', 'match-left', 'match-right']).optional()
+})).max(createProjectBodyScenesMax),
+  "cartoonCast": zod.array(zod.object({
+  "id": zod.string().max(createProjectBodyCartoonCastItemIdMax),
+  "name": zod.string().max(createProjectBodyCartoonCastItemNameMax),
+  "role": zod.string().max(createProjectBodyCartoonCastItemRoleMax),
+  "personality": zod.string().max(createProjectBodyCartoonCastItemPersonalityMax).optional(),
+  "shirtColor": zod.string().regex(createProjectBodyCartoonCastItemShirtColorRegExp),
+  "skinTone": zod.string().regex(createProjectBodyCartoonCastItemSkinToneRegExp),
+  "hairStyle": zod.enum(['short', 'curly', 'long']),
+  "accessory": zod.enum(['none', 'cap', 'glasses', 'headband', 'backpack', 'bow'])
+})).max(createProjectBodyCartoonCastMax).optional()
 })
 
 export const createProjectResponseOneTitleMax = 160;
@@ -266,6 +318,18 @@ export const createProjectResponseOneDurationSecondsMax = 600;
 export const createProjectResponseOneScenesItemSecondsMax = 90;
 
 export const createProjectResponseOneScenesMax = 40;
+
+export const createProjectResponseOneCartoonCastItemIdMax = 64;
+
+export const createProjectResponseOneCartoonCastItemNameMax = 40;
+
+export const createProjectResponseOneCartoonCastItemRoleMax = 60;
+
+export const createProjectResponseOneCartoonCastItemPersonalityMax = 120;
+
+export const createProjectResponseOneCartoonCastItemShirtColorRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const createProjectResponseOneCartoonCastItemSkinToneRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const createProjectResponseOneCartoonCastMax = 5;
 
 
 
@@ -293,8 +357,22 @@ export const CreateProjectResponse = zod.object({
   "visualMetaphor": zod.string().optional(),
   "onScreenText": zod.string().optional(),
   "cameraMove": zod.string().optional(),
-  "soundCue": zod.string().optional()
-})).max(createProjectResponseOneScenesMax)
+  "soundCue": zod.string().optional(),
+  "entrance": zod.enum(['already-on-stage', 'walk-in-left', 'walk-in-right', 'run-in-left', 'run-in-right', 'pop-in']).optional(),
+  "groupAction": zod.enum(['story-directed', 'talk-and-react', 'walk-together', 'point-together', 'celebrate-together']).optional(),
+  "exit": zod.enum(['hold', 'walk-off-left', 'walk-off-right', 'run-off-left', 'run-off-right', 'exit-together']).optional(),
+  "transitionToNext": zod.enum(['cut', 'dissolve', 'wipe-left', 'wipe-right', 'match-left', 'match-right']).optional()
+})).max(createProjectResponseOneScenesMax),
+  "cartoonCast": zod.array(zod.object({
+  "id": zod.string().max(createProjectResponseOneCartoonCastItemIdMax),
+  "name": zod.string().max(createProjectResponseOneCartoonCastItemNameMax),
+  "role": zod.string().max(createProjectResponseOneCartoonCastItemRoleMax),
+  "personality": zod.string().max(createProjectResponseOneCartoonCastItemPersonalityMax).optional(),
+  "shirtColor": zod.string().regex(createProjectResponseOneCartoonCastItemShirtColorRegExp),
+  "skinTone": zod.string().regex(createProjectResponseOneCartoonCastItemSkinToneRegExp),
+  "hairStyle": zod.enum(['short', 'curly', 'long']),
+  "accessory": zod.enum(['none', 'cap', 'glasses', 'headband', 'backpack', 'bow'])
+})).max(createProjectResponseOneCartoonCastMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "createdAt": zod.coerce.date(),
@@ -329,6 +407,18 @@ export const updateProjectBodyScenesItemSecondsMax = 90;
 
 export const updateProjectBodyScenesMax = 40;
 
+export const updateProjectBodyCartoonCastItemIdMax = 64;
+
+export const updateProjectBodyCartoonCastItemNameMax = 40;
+
+export const updateProjectBodyCartoonCastItemRoleMax = 60;
+
+export const updateProjectBodyCartoonCastItemPersonalityMax = 120;
+
+export const updateProjectBodyCartoonCastItemShirtColorRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const updateProjectBodyCartoonCastItemSkinToneRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const updateProjectBodyCartoonCastMax = 5;
+
 
 
 export const UpdateProjectBody = zod.object({
@@ -355,8 +445,22 @@ export const UpdateProjectBody = zod.object({
   "visualMetaphor": zod.string().optional(),
   "onScreenText": zod.string().optional(),
   "cameraMove": zod.string().optional(),
-  "soundCue": zod.string().optional()
-})).max(updateProjectBodyScenesMax)
+  "soundCue": zod.string().optional(),
+  "entrance": zod.enum(['already-on-stage', 'walk-in-left', 'walk-in-right', 'run-in-left', 'run-in-right', 'pop-in']).optional(),
+  "groupAction": zod.enum(['story-directed', 'talk-and-react', 'walk-together', 'point-together', 'celebrate-together']).optional(),
+  "exit": zod.enum(['hold', 'walk-off-left', 'walk-off-right', 'run-off-left', 'run-off-right', 'exit-together']).optional(),
+  "transitionToNext": zod.enum(['cut', 'dissolve', 'wipe-left', 'wipe-right', 'match-left', 'match-right']).optional()
+})).max(updateProjectBodyScenesMax),
+  "cartoonCast": zod.array(zod.object({
+  "id": zod.string().max(updateProjectBodyCartoonCastItemIdMax),
+  "name": zod.string().max(updateProjectBodyCartoonCastItemNameMax),
+  "role": zod.string().max(updateProjectBodyCartoonCastItemRoleMax),
+  "personality": zod.string().max(updateProjectBodyCartoonCastItemPersonalityMax).optional(),
+  "shirtColor": zod.string().regex(updateProjectBodyCartoonCastItemShirtColorRegExp),
+  "skinTone": zod.string().regex(updateProjectBodyCartoonCastItemSkinToneRegExp),
+  "hairStyle": zod.enum(['short', 'curly', 'long']),
+  "accessory": zod.enum(['none', 'cap', 'glasses', 'headband', 'backpack', 'bow'])
+})).max(updateProjectBodyCartoonCastMax).optional()
 })
 
 export const updateProjectResponseOneTitleMax = 160;
@@ -377,6 +481,18 @@ export const updateProjectResponseOneDurationSecondsMax = 600;
 export const updateProjectResponseOneScenesItemSecondsMax = 90;
 
 export const updateProjectResponseOneScenesMax = 40;
+
+export const updateProjectResponseOneCartoonCastItemIdMax = 64;
+
+export const updateProjectResponseOneCartoonCastItemNameMax = 40;
+
+export const updateProjectResponseOneCartoonCastItemRoleMax = 60;
+
+export const updateProjectResponseOneCartoonCastItemPersonalityMax = 120;
+
+export const updateProjectResponseOneCartoonCastItemShirtColorRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const updateProjectResponseOneCartoonCastItemSkinToneRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const updateProjectResponseOneCartoonCastMax = 5;
 
 
 
@@ -404,8 +520,22 @@ export const UpdateProjectResponse = zod.object({
   "visualMetaphor": zod.string().optional(),
   "onScreenText": zod.string().optional(),
   "cameraMove": zod.string().optional(),
-  "soundCue": zod.string().optional()
-})).max(updateProjectResponseOneScenesMax)
+  "soundCue": zod.string().optional(),
+  "entrance": zod.enum(['already-on-stage', 'walk-in-left', 'walk-in-right', 'run-in-left', 'run-in-right', 'pop-in']).optional(),
+  "groupAction": zod.enum(['story-directed', 'talk-and-react', 'walk-together', 'point-together', 'celebrate-together']).optional(),
+  "exit": zod.enum(['hold', 'walk-off-left', 'walk-off-right', 'run-off-left', 'run-off-right', 'exit-together']).optional(),
+  "transitionToNext": zod.enum(['cut', 'dissolve', 'wipe-left', 'wipe-right', 'match-left', 'match-right']).optional()
+})).max(updateProjectResponseOneScenesMax),
+  "cartoonCast": zod.array(zod.object({
+  "id": zod.string().max(updateProjectResponseOneCartoonCastItemIdMax),
+  "name": zod.string().max(updateProjectResponseOneCartoonCastItemNameMax),
+  "role": zod.string().max(updateProjectResponseOneCartoonCastItemRoleMax),
+  "personality": zod.string().max(updateProjectResponseOneCartoonCastItemPersonalityMax).optional(),
+  "shirtColor": zod.string().regex(updateProjectResponseOneCartoonCastItemShirtColorRegExp),
+  "skinTone": zod.string().regex(updateProjectResponseOneCartoonCastItemSkinToneRegExp),
+  "hairStyle": zod.enum(['short', 'curly', 'long']),
+  "accessory": zod.enum(['none', 'cap', 'glasses', 'headband', 'backpack', 'bow'])
+})).max(updateProjectResponseOneCartoonCastMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "createdAt": zod.coerce.date(),
@@ -440,6 +570,18 @@ export const approveProjectResponseOneScenesItemSecondsMax = 90;
 
 export const approveProjectResponseOneScenesMax = 40;
 
+export const approveProjectResponseOneCartoonCastItemIdMax = 64;
+
+export const approveProjectResponseOneCartoonCastItemNameMax = 40;
+
+export const approveProjectResponseOneCartoonCastItemRoleMax = 60;
+
+export const approveProjectResponseOneCartoonCastItemPersonalityMax = 120;
+
+export const approveProjectResponseOneCartoonCastItemShirtColorRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const approveProjectResponseOneCartoonCastItemSkinToneRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const approveProjectResponseOneCartoonCastMax = 5;
+
 
 
 export const ApproveProjectResponse = zod.object({
@@ -466,8 +608,22 @@ export const ApproveProjectResponse = zod.object({
   "visualMetaphor": zod.string().optional(),
   "onScreenText": zod.string().optional(),
   "cameraMove": zod.string().optional(),
-  "soundCue": zod.string().optional()
-})).max(approveProjectResponseOneScenesMax)
+  "soundCue": zod.string().optional(),
+  "entrance": zod.enum(['already-on-stage', 'walk-in-left', 'walk-in-right', 'run-in-left', 'run-in-right', 'pop-in']).optional(),
+  "groupAction": zod.enum(['story-directed', 'talk-and-react', 'walk-together', 'point-together', 'celebrate-together']).optional(),
+  "exit": zod.enum(['hold', 'walk-off-left', 'walk-off-right', 'run-off-left', 'run-off-right', 'exit-together']).optional(),
+  "transitionToNext": zod.enum(['cut', 'dissolve', 'wipe-left', 'wipe-right', 'match-left', 'match-right']).optional()
+})).max(approveProjectResponseOneScenesMax),
+  "cartoonCast": zod.array(zod.object({
+  "id": zod.string().max(approveProjectResponseOneCartoonCastItemIdMax),
+  "name": zod.string().max(approveProjectResponseOneCartoonCastItemNameMax),
+  "role": zod.string().max(approveProjectResponseOneCartoonCastItemRoleMax),
+  "personality": zod.string().max(approveProjectResponseOneCartoonCastItemPersonalityMax).optional(),
+  "shirtColor": zod.string().regex(approveProjectResponseOneCartoonCastItemShirtColorRegExp),
+  "skinTone": zod.string().regex(approveProjectResponseOneCartoonCastItemSkinToneRegExp),
+  "hairStyle": zod.enum(['short', 'curly', 'long']),
+  "accessory": zod.enum(['none', 'cap', 'glasses', 'headband', 'backpack', 'bow'])
+})).max(approveProjectResponseOneCartoonCastMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "createdAt": zod.coerce.date(),
@@ -499,6 +655,18 @@ export const generateStoryboardBodyStyleIdMax = 20;
 export const generateStoryboardBodyDurationSecondsMin = 15;
 export const generateStoryboardBodyDurationSecondsMax = 600;
 
+export const generateStoryboardBodyCartoonCastItemIdMax = 64;
+
+export const generateStoryboardBodyCartoonCastItemNameMax = 40;
+
+export const generateStoryboardBodyCartoonCastItemRoleMax = 60;
+
+export const generateStoryboardBodyCartoonCastItemPersonalityMax = 120;
+
+export const generateStoryboardBodyCartoonCastItemShirtColorRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const generateStoryboardBodyCartoonCastItemSkinToneRegExp = new RegExp('^#[0-9A-Fa-f]{6}$');
+export const generateStoryboardBodyCartoonCastMax = 5;
+
 
 
 export const GenerateStoryboardBody = zod.object({
@@ -507,7 +675,17 @@ export const GenerateStoryboardBody = zod.object({
   "styleId": zod.string().max(generateStoryboardBodyStyleIdMax),
   "aspectRatio": zod.enum(['16:9', '9:16']),
   "durationSeconds": zod.number().int().min(generateStoryboardBodyDurationSecondsMin).max(generateStoryboardBodyDurationSecondsMax),
-  "contentLanguage": zod.enum(['en', 'am', 'ar'])
+  "contentLanguage": zod.enum(['en', 'am', 'ar']),
+  "cartoonCast": zod.array(zod.object({
+  "id": zod.string().max(generateStoryboardBodyCartoonCastItemIdMax),
+  "name": zod.string().max(generateStoryboardBodyCartoonCastItemNameMax),
+  "role": zod.string().max(generateStoryboardBodyCartoonCastItemRoleMax),
+  "personality": zod.string().max(generateStoryboardBodyCartoonCastItemPersonalityMax).optional(),
+  "shirtColor": zod.string().regex(generateStoryboardBodyCartoonCastItemShirtColorRegExp),
+  "skinTone": zod.string().regex(generateStoryboardBodyCartoonCastItemSkinToneRegExp),
+  "hairStyle": zod.enum(['short', 'curly', 'long']),
+  "accessory": zod.enum(['none', 'cap', 'glasses', 'headband', 'backpack', 'bow'])
+})).max(generateStoryboardBodyCartoonCastMax).optional()
 })
 
 export const generateStoryboardResponseScenesItemSecondsMax = 90;
@@ -532,7 +710,11 @@ export const GenerateStoryboardResponse = zod.object({
   "visualMetaphor": zod.string().optional(),
   "onScreenText": zod.string().optional(),
   "cameraMove": zod.string().optional(),
-  "soundCue": zod.string().optional()
+  "soundCue": zod.string().optional(),
+  "entrance": zod.enum(['already-on-stage', 'walk-in-left', 'walk-in-right', 'run-in-left', 'run-in-right', 'pop-in']).optional(),
+  "groupAction": zod.enum(['story-directed', 'talk-and-react', 'walk-together', 'point-together', 'celebrate-together']).optional(),
+  "exit": zod.enum(['hold', 'walk-off-left', 'walk-off-right', 'run-off-left', 'run-off-right', 'exit-together']).optional(),
+  "transitionToNext": zod.enum(['cut', 'dissolve', 'wipe-left', 'wipe-right', 'match-left', 'match-right']).optional()
 })).min(generateStoryboardResponseScenesMin).max(generateStoryboardResponseScenesMax)
 })
 

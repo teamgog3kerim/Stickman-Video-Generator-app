@@ -16,6 +16,21 @@ type RenderScene = {
   visualMetaphor?: string;
   shotType?: string;
   cameraMove?: string;
+  entrance?: "already-on-stage" | "walk-in-left" | "walk-in-right" | "run-in-left" | "run-in-right" | "pop-in";
+  groupAction?: "story-directed" | "talk-and-react" | "walk-together" | "point-together" | "celebrate-together";
+  exit?: "hold" | "walk-off-left" | "walk-off-right" | "run-off-left" | "run-off-right" | "exit-together";
+  transitionToNext?: "cut" | "dissolve" | "wipe-left" | "wipe-right" | "match-left" | "match-right";
+};
+
+type RenderCastMember = {
+  id: string;
+  name: string;
+  role: string;
+  personality?: string;
+  shirtColor: string;
+  skinTone: string;
+  hairStyle: "short" | "curly" | "long";
+  accessory: "none" | "cap" | "glasses" | "headband" | "backpack" | "bow";
 };
 
 type RenderInput = {
@@ -27,6 +42,7 @@ type RenderInput = {
   voiceover: boolean;
   subtitles: boolean;
   scenes: RenderScene[];
+  cartoonCast?: RenderCastMember[];
 };
 
 const STYLE_PALETTES: Record<string, { paper: string; ink: string; accent: string; field: string }> = {
@@ -53,6 +69,9 @@ const STYLE_PALETTES: Record<string, { paper: string; ink: string; accent: strin
 const CARTOON_STYLE_IDS = new Set(["A8", "A9", "A10", "B8", "B9"]);
 const FPS = 24;
 const POSE_FRAMES = 24;
+const MOVEMENT_FRAMES = 8;
+const TRANSITION_FRAMES = 8;
+const TRANSITION_SECONDS = TRANSITION_FRAMES / FPS;
 
 type SceneContext = "nature" | "finance" | "technology" | "science" | "health" | "learning" | "food" | "city" | "classroom" | "mall" | "home" | "office" | "park" | "studio";
 type StickmanAction = "walk" | "run" | "wave" | "think" | "celebrate" | "lift" | "present";
@@ -64,6 +83,10 @@ function escapeXml(value: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
+}
+
+function safeHex(value: string, fallback: string): string {
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
 }
 
 function wrapText(value: string, maxChars: number, maxLines: number): string[] {
@@ -185,14 +208,16 @@ function cartoonCharacter(
   x: number,
   groundY: number,
   scale: number,
-  shirt: string,
-  skin: string,
   palette: (typeof STYLE_PALETTES)[string],
   phase: number,
   action: CartoonAction,
   characterIndex: number,
-  styleId: string,
+  member: RenderCastMember,
+  offsetX = 0,
+  popScale = 1,
 ): string {
+  const shirt = safeHex(member.shirtColor, ["#e9784f", "#4b84ae", "#6d9b78"][characterIndex % 3]!);
+  const skin = safeHex(member.skinTone, ["#ffd65f", "#fff5e8", "#efbd91"][characterIndex % 3]!);
   const cycle = Math.sin(phase * Math.PI * 2 + characterIndex * 1.7);
   const bounce = action === "react" || action === "celebrate" ? Math.max(0, cycle) * 11 : action === "run" ? Math.abs(cycle) * 7 : cycle * 2;
   const swing = cycle * (action === "run" ? 30 : 19);
@@ -217,28 +242,38 @@ function cartoonCharacter(
   const mouth = mouthOpen
     ? `<ellipse cx="0" cy="-66" rx="7" ry="9" fill="${palette.ink}"/><ellipse cx="0" cy="-63" rx="3" ry="2" fill="${palette.accent}"/>`
     : `<path d="M-10 -68 Q0 -58 10 -68" fill="none" stroke="${palette.ink}" stroke-width="4" stroke-linecap="round"/>`;
-  const hair = characterIndex === 0
-    ? `<path d="M-35 -91 Q-42 -122 -12 -123 Q8 -137 30 -116 Q42 -104 34 -87 Q17 -99 5 -107 Q-9 -91 -35 -91Z" fill="${palette.ink}"/>`
-    : characterIndex === 1
-      ? `<path d="M-38 -91 Q-36 -122 0 -123 Q36 -121 39 -90 L28 -97 Q18 -107 9 -95 Q-5 -106 -15 -94Z" fill="${palette.accent}"/>`
-      : `<path d="M-34 -94 Q-35 -120 -4 -124 Q24 -126 35 -99 Q12 -113 -4 -105 Q-18 -97 -34 -94Z" fill="${palette.ink}" opacity=".86"/>`;
-  const cap = (styleId === "A8" && characterIndex === 0) || (styleId === "B9" && characterIndex === 0)
-    ? `<path d="M-39 -112 Q0 -139 39 -112 L34 -102 H-35Z M-3 -127 Q24 -137 38 -116" fill="${shirt}" stroke="${palette.ink}" stroke-width="4" stroke-linejoin="round"/>`
+  const hair = member.hairStyle === "curly"
+    ? `<path d="M-39 -91 Q-46 -120 -20 -124 Q-5 -142 11 -125 Q36 -130 41 -104 Q45 -91 32 -88Z" fill="${palette.ink}"/><circle cx="-20" cy="-116" r="10" fill="${palette.ink}"/><circle cx="0" cy="-124" r="10" fill="${palette.ink}"/><circle cx="20" cy="-116" r="10" fill="${palette.ink}"/>`
+    : member.hairStyle === "long"
+      ? `<path d="M-39 -91 Q-45 -126 -8 -127 Q30 -131 39 -98 L38 -48 Q23 -57 24 -91 Q8 -107 -5 -95 Q-22 -88 -39 -91Z" fill="${palette.ink}"/>`
+      : `<path d="M-35 -91 Q-42 -122 -12 -123 Q8 -137 30 -116 Q42 -104 34 -87 Q17 -99 5 -107 Q-9 -91 -35 -91Z" fill="${palette.ink}"/>`;
+  const backpack = member.accessory === "backpack"
+    ? `<rect x="-42" y="-29" width="18" height="49" rx="7" fill="${palette.accent}" stroke="${palette.ink}" stroke-width="4"/><path d="M-40 -17h14" stroke="${palette.paper}" stroke-width="3"/>`
     : "";
+  const headAccessory = member.accessory === "cap"
+    ? `<path d="M-39 -112 Q0 -139 39 -112 L34 -102 H-35Z M-3 -127 Q24 -137 38 -116" fill="${shirt}" stroke="${palette.ink}" stroke-width="4" stroke-linejoin="round"/>`
+    : member.accessory === "glasses"
+      ? `<g fill="none" stroke="${palette.ink}" stroke-width="4"><circle cx="-13" cy="-86" r="12"/><circle cx="13" cy="-86" r="12"/><path d="M-1 -86h2 M-29 -88l-7 -3 M29 -88l7 -3"/></g>`
+      : member.accessory === "headband"
+        ? `<path d="M-37 -101 Q0 -123 37 -101" fill="none" stroke="${shirt}" stroke-width="9" stroke-linecap="round"/>`
+        : member.accessory === "bow"
+          ? `<path d="M21 -119 Q7 -135 19 -137 Q30 -136 27 -126 Q38 -139 44 -128 Q46 -116 30 -116Z" fill="${palette.accent}" stroke="${palette.ink}" stroke-width="3"/>`
+          : "";
   const motionMarks = action === "run" || action === "react"
     ? `<path d="M-71 -31h-20 M-72 -13h-15 M70 -28h20" stroke="${palette.accent}" stroke-width="5" stroke-linecap="round" opacity=".82"/>`
     : "";
 
-  return `<g transform="translate(${x} ${groundY - bounce}) scale(${scale})">
+  return `<g transform="translate(${x + offsetX} ${groundY - bounce}) scale(${scale * popScale})">
     <ellipse cx="0" cy="8" rx="57" ry="12" fill="${palette.ink}" opacity=".14"/>
     ${motionMarks}
     <path d="M-13 31 L${-21 - stride * .35} 77 L${-35 - stride} 125 L-18 127 L0 80 L15 127 L35 125 L${21 + stride} 77 L13 31Z" fill="${palette.ink}" stroke="${palette.ink}" stroke-width="3" stroke-linejoin="round"/>
+    ${backpack}
     <path d="M-24 -44 Q0 -57 24 -44 L20 30 Q0 42 -20 30Z" fill="${shirt}" stroke="${palette.ink}" stroke-width="5" stroke-linejoin="round"/>
     <path d="M-20 -33 L${leftArm.elbowX} ${leftArm.elbowY} L${leftArm.handX} ${leftArm.handY} M20 -33 L${rightArm.elbowX} ${rightArm.elbowY} L${rightArm.handX} ${rightArm.handY}" fill="none" stroke="${palette.ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M-20 -31 L${leftArm.elbowX} ${leftArm.elbowY} M20 -31 L${rightArm.elbowX} ${rightArm.elbowY}" fill="none" stroke="${shirt}" stroke-width="4" stroke-linecap="round"/>
     <path d="M-35 125 q-5 9 15 10 h12 l-1 -8 M35 125 q6 9 -14 10 h-12 l1 -8" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="5" stroke-linejoin="round"/>
     <circle cx="0" cy="-83" r="39" fill="${skin}" stroke="${palette.ink}" stroke-width="5"/>
-    ${hair}${cap}
+    ${hair}${headAccessory}
     <ellipse cx="-13" cy="-86" rx="6" ry="${blink ? 1.5 : 8}" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="2.5"/>
     <ellipse cx="13" cy="-86" rx="6" ry="${blink ? 1.5 : 8}" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="2.5"/>
     ${blink ? "" : `<circle cx="-12" cy="-85" r="2.6" fill="${palette.ink}"/><circle cx="14" cy="-85" r="2.6" fill="${palette.ink}"/>`}
@@ -259,7 +294,39 @@ function textRows(lines: string[], x: number, y: number, fontSize: number, fill:
     .join("");
 }
 
-function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, phase = 0): string {
+type StageMotion = { entranceProgress?: number; exitProgress?: number };
+
+function fallbackCartoonCast(): RenderCastMember[] {
+  return [
+    { id: "cast-lead", name: "Mika", role: "Lead", shirtColor: "#e9784f", skinTone: "#ffd65f", hairStyle: "short", accessory: "cap" },
+    { id: "cast-friend", name: "Lumi", role: "Friend", shirtColor: "#4b84ae", skinTone: "#fff5e8", hairStyle: "curly", accessory: "glasses" },
+    { id: "cast-helper", name: "Tobi", role: "Helper", shirtColor: "#6d9b78", skinTone: "#efbd91", hairStyle: "long", accessory: "backpack" },
+  ];
+}
+
+function castForRender(input: RenderInput): RenderCastMember[] {
+  const cast = input.cartoonCast?.filter((member) => member && typeof member.id === "string" && typeof member.name === "string").slice(0, 5);
+  return cast && cast.length >= 2 ? cast : fallbackCartoonCast();
+}
+
+function groupActionForCharacter(scene: RenderScene, primaryAction: StickmanAction, characterIndex: number): CartoonAction {
+  switch (scene.groupAction ?? "story-directed") {
+    case "walk-together":
+      return "walk";
+    case "point-together":
+      return "present";
+    case "celebrate-together":
+      return "celebrate";
+    case "talk-and-react":
+      return characterIndex === 0 ? "talk" : characterIndex % 2 === 1 ? "listen" : "react";
+    default:
+      if (characterIndex === 0) return primaryAction;
+      if (characterIndex === 1) return primaryAction === "celebrate" ? "react" : "listen";
+      return primaryAction === "walk" || primaryAction === "run" ? "wave" : "react";
+  }
+}
+
+function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, phase = 0, stageMotion: StageMotion = {}): string {
   const portrait = input.aspectRatio === "9:16";
   const width = portrait ? 720 : 1280;
   const height = portrait ? 1280 : 720;
@@ -281,6 +348,26 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const textAnchor = "start";
   const context = contextForScene(scene, input.topic, input.styleId);
   const action = actionForScene(scene);
+  const entrance = scene.entrance ?? (index === 0 ? "walk-in-left" : "already-on-stage");
+  const exit = scene.exit ?? "hold";
+  const entranceProgress = stageMotion.entranceProgress === undefined ? 1 : Math.max(0, Math.min(1, stageMotion.entranceProgress));
+  const exitProgress = stageMotion.exitProgress === undefined ? 0 : Math.max(0, Math.min(1, stageMotion.exitProgress));
+  const ease = (value: number) => value * value * (3 - 2 * value);
+  const entryDirection = entrance.endsWith("right") ? 1 : -1;
+  const exitDirection = exit.endsWith("left") ? -1 : 1;
+  const stageOffset = stageMotion.entranceProgress !== undefined
+    ? entryDirection * width * .42 * (1 - ease(entranceProgress))
+    : stageMotion.exitProgress !== undefined
+      ? exitDirection * width * .42 * ease(exitProgress)
+      : 0;
+  const entryPopScale = entrance === "pop-in" && stageMotion.entranceProgress !== undefined
+    ? Math.max(.06, ease(entranceProgress))
+    : 1;
+  const stageMoveAction: CartoonAction | null = stageMotion.entranceProgress !== undefined
+    ? entrance.startsWith("run") ? "run" : entrance.startsWith("walk") ? "walk" : null
+    : stageMotion.exitProgress !== undefined
+      ? exit.startsWith("run") ? "run" : exit.startsWith("walk") || exit === "exit-together" ? "walk" : null
+      : null;
   const orbit = index % 2 === 0 ? -1 : 1;
   const motion = Math.sin(phase * Math.PI * 2);
   const walkingAction = action === "walk" || action === "run";
@@ -331,28 +418,29 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
             : context === "science"
               ? `<circle cx="0" cy="0" r="30" fill="${palette.paper}" stroke="${palette.accent}" stroke-width="7"/><ellipse cx="0" cy="0" rx="48" ry="16" fill="none" stroke="${palette.ink}" stroke-width="4" transform="rotate(-28)"/><circle cx="31" cy="-21" r="7" fill="${palette.accent}"/>`
                : `<rect x="-38" y="-38" width="76" height="76" rx="21" fill="${palette.accent}" opacity=".88"/><path d="M-18 0 H18 M0 -18 V18" stroke="${palette.paper}" stroke-width="7" stroke-linecap="round"/>`;
+  const cartoonCast = cartoonSeries ? castForRender(input) : [];
   const cartoonCharacters = cartoonSeries
-    ? [0, 1, 2].map((characterIndex) => {
-        const positions = portrait ? [124, 360, 596] : [width * 0.25, width * 0.5, width * 0.75];
-        const x = positions[input.contentLanguage === "ar" ? 2 - characterIndex : characterIndex]!;
-        const actions: CartoonAction[] = [
-          action,
-          action === "run" || action === "celebrate" ? "react" : "listen",
-          action === "walk" ? "wave" : "react",
-        ];
-        const shirts = [palette.accent, "#4b84ae", "#6d9b78"];
-        const skins = ["#ffd65f", "#fff5e8", "#efbd91"];
+    ? cartoonCast.map((member, characterIndex) => {
+        const margin = width * (portrait ? .17 : .18);
+        const positions = cartoonCast.map((_entry, positionIndex) =>
+          cartoonCast.length === 1
+            ? width / 2
+            : margin + ((width - margin * 2) / (cartoonCast.length - 1)) * positionIndex,
+        );
+        const positionIndex = input.contentLanguage === "ar" ? cartoonCast.length - 1 - characterIndex : characterIndex;
+        const x = positions[positionIndex]!;
+        const characterAction = stageMoveAction ?? groupActionForCharacter(scene, action, characterIndex);
         return cartoonCharacter(
           x,
           portrait ? 925 : 455,
-          portrait ? 0.87 : 0.72,
-          shirts[characterIndex]!,
-          skins[characterIndex]!,
+          portrait ? .87 : .72,
           palette,
           phase,
-          actions[characterIndex]!,
+          characterAction,
           characterIndex,
-          input.styleId,
+          member,
+          stageOffset,
+          entryPopScale,
         );
       }).join("")
     : `<g transform="translate(${stickX} ${stickY + bodyBob}) scale(${scale})">
@@ -394,9 +482,9 @@ function run(command: string, args: string[]): Promise<string> {
       if (stderr.length < 2000) stderr += chunk.toString();
     });
     child.once("error", reject);
-    child.once("close", (code) => {
+    child.once("close", (code, signal) => {
       if (code === 0) resolve(stdout.trim());
-      else reject(new Error(`${command} failed with exit code ${code}: ${stderr.slice(-700)}`));
+      else reject(new Error(`${command} failed with exit code ${code ?? "unknown"}${signal ? ` (${signal})` : ""}: ${stderr.slice(-700)}`));
     });
   });
 }
@@ -490,38 +578,95 @@ export async function renderStoryboardVideo(input: RenderInput): Promise<{ buffe
       );
     }
 
-    const scenePatterns: string[] = [];
-    for (const [index, scene] of input.scenes.entries()) {
-      const svgPaths: string[] = [];
-      for (let frame = 0; frame < POSE_FRAMES; frame += 1) {
-        const svgPath = join(directory, `scene-${index}-${String(frame).padStart(2, "0")}.svg`);
-        await writeFile(svgPath, createSceneSvg(scene, index, input, frame / POSE_FRAMES), "utf8");
-        svgPaths.push(svgPath);
-      }
-      const framePattern = join(directory, `scene-${index}-%02d.png`);
-      await run("convert", [...svgPaths, "-resize", `${width}x${height}!`, framePattern]);
-      scenePatterns.push(framePattern);
-    }
-
-    const ffmpegArgs = ["-hide_banner", "-loglevel", "error", "-y"];
-    for (const framePattern of scenePatterns) {
-      ffmpegArgs.push(
-        "-stream_loop",
-        "-1",
-        "-framerate",
-        String(FPS),
-        "-i",
-        framePattern,
-      );
-    }
-
     const sceneFrameCounts = input.scenes.map((scene) => Math.max(1, Math.round(scene.seconds * FPS)));
     const totalFrames = sceneFrameCounts.reduce((total, frames) => total + frames, 0);
-    const filters = input.scenes.map((scene, index) => {
-      const frames = sceneFrameCounts[index]!;
+    type SegmentKind = "entrance" | "idle" | "exit" | "hold";
+    type SegmentPlan = { pattern: string; frames: number; loop: boolean; inputIndex: number; kind: SegmentKind };
+    type ScenePlan = { segments: SegmentPlan[]; frames: number; transition: string };
+    const ffmpegArgs = ["-hide_banner", "-loglevel", "error", "-y"];
+    const scenePlans: ScenePlan[] = [];
+    let inputIndex = 0;
+
+    const renderSegment = async (
+      scene: RenderScene,
+      sceneIndex: number,
+      kind: SegmentKind,
+      frameCount: number,
+    ): Promise<SegmentPlan> => {
+      const sampleCount = kind === "idle" ? POSE_FRAMES : frameCount;
+      const svgPaths: string[] = [];
+      for (let frame = 0; frame < sampleCount; frame += 1) {
+        const path = join(directory, `scene-${sceneIndex}-${kind}-${String(frame).padStart(2, "0")}.svg`);
+        const progress = sampleCount <= 1 ? 1 : frame / (sampleCount - 1);
+        const stageMotion: StageMotion = kind === "entrance"
+          ? { entranceProgress: progress }
+          : kind === "exit"
+            ? { exitProgress: progress }
+            : kind === "hold" && scene.exit && scene.exit !== "hold"
+              ? { exitProgress: 1 }
+            : {};
+        const phase = kind === "idle" ? frame / POSE_FRAMES : kind === "hold" ? 0 : frame / sampleCount;
+        await writeFile(path, createSceneSvg(scene, sceneIndex, input, phase, stageMotion), "utf8");
+        svgPaths.push(path);
+      }
+      const pattern = join(directory, `scene-${sceneIndex}-${kind}-%02d.png`);
+      await run("convert", [...svgPaths, "-resize", `${width}x${height}!`, pattern]);
+      const segment: SegmentPlan = {
+        pattern,
+        frames: frameCount,
+        loop: kind === "idle",
+        inputIndex: inputIndex++,
+        kind,
+      };
+      ffmpegArgs.push("-framerate", String(FPS), "-i", pattern);
+      return segment;
+    };
+
+    for (const [index, scene] of input.scenes.entries()) {
+      const frameCount = sceneFrameCounts[index]!;
+      const cartoonSeries = CARTOON_STYLE_IDS.has(input.styleId);
+      const entrance = scene.entrance ?? (index === 0 ? "walk-in-left" : "already-on-stage");
+      const exit = scene.exit ?? "hold";
+      const entranceFrames = cartoonSeries && entrance !== "already-on-stage"
+        ? Math.min(MOVEMENT_FRAMES, Math.max(1, Math.floor(frameCount / 3)))
+        : 0;
+      const exitFrames = cartoonSeries && exit !== "hold"
+        ? Math.min(MOVEMENT_FRAMES, Math.max(1, Math.floor(frameCount / 3)))
+        : 0;
+      const idleFrames = Math.max(0, frameCount - entranceFrames - exitFrames);
+      const transition = index < input.scenes.length - 1
+        ? scene.transitionToNext ?? (cartoonSeries ? "match-left" : "cut")
+        : "cut";
+      const segments: SegmentPlan[] = [];
+      if (entranceFrames > 0) segments.push(await renderSegment(scene, index, "entrance", entranceFrames));
+      if (idleFrames > 0) segments.push(await renderSegment(scene, index, "idle", idleFrames));
+      if (exitFrames > 0) segments.push(await renderSegment(scene, index, "exit", exitFrames));
+      if (transition !== "cut") segments.push(await renderSegment(scene, index, "hold", TRANSITION_FRAMES));
+      scenePlans.push({ segments, frames: frameCount, transition });
+    }
+
+    const filters: string[] = [];
+    const sceneLabels: string[] = [];
+    for (const [sceneIndex, plan] of scenePlans.entries()) {
+      const segmentLabels: string[] = [];
+      for (const [segmentIndex, segment] of plan.segments.entries()) {
+        const label = `segment_${sceneIndex}_${segmentIndex}`;
+        const extraLoops = segment.loop ? Math.max(0, Math.ceil(segment.frames / POSE_FRAMES) - 1) : 0;
+        const finiteLoop = extraLoops > 0 ? `loop=loop=${extraLoops}:size=${POSE_FRAMES}:start=0,` : "";
+        filters.push(`[${segment.inputIndex}:v]${finiteLoop}trim=end_frame=${segment.frames},setpts=PTS-STARTPTS[${label}]`);
+        segmentLabels.push(`[${label}]`);
+      }
+      const sourceLabel = `scene_source_${sceneIndex}`;
+      if (segmentLabels.length === 1) {
+        filters.push(`${segmentLabels[0]}null[${sourceLabel}]`);
+      } else {
+        filters.push(`${segmentLabels.join("")}concat=n=${segmentLabels.length}:v=1:a=0[${sourceLabel}]`);
+      }
+      const scene = input.scenes[sceneIndex]!;
+      const frames = plan.frames + (plan.transition === "cut" ? 0 : TRANSITION_FRAMES);
       const cameraMove = (scene.cameraMove ?? "").toLowerCase();
       const zoomOut = /pull|back|zoom out|reveal/.test(cameraMove)
-        || (!/push|zoom in/.test(cameraMove) && index % 2 === 1);
+        || (!/push|zoom in/.test(cameraMove) && sceneIndex % 2 === 1);
       const zoom = zoomOut
         ? `1.12-0.12*on/${frames}`
         : `1+0.12*on/${frames}`;
@@ -530,18 +675,43 @@ export async function renderStoryboardVideo(input: RenderInput): Promise<{ buffe
         : /pan right|move right/.test(cameraMove)
           ? `(iw-iw/zoom)*on/${frames}`
           : "iw/2-(iw/zoom/2)";
-      return `[${index}:v]zoompan=z='${zoom}':x='${x}':y='ih/2-(ih/zoom/2)':d=1:s=${width}x${height}:fps=${FPS},trim=end_frame=${frames},setpts=PTS-STARTPTS,format=yuv420p,setsar=1[v${index}]`;
-    });
-    const concatInputs = input.scenes.map((_scene, index) => `[v${index}]`).join("");
-    filters.push(`${concatInputs}concat=n=${input.scenes.length}:v=1:a=0[outv]`);
+      const sceneLabel = `video_${sceneIndex}`;
+      filters.push(`[${sourceLabel}]zoompan=z='${zoom}':x='${x}':y='ih/2-(ih/zoom/2)':d=1:s=${width}x${height}:fps=${FPS},trim=end_frame=${frames},setpts=N/(${FPS}*TB),fps=${FPS},format=yuv420p,setsar=1,settb=AVTB[${sceneLabel}]`);
+      sceneLabels.push(`[${sceneLabel}]`);
+    }
+
+    let timelineLabel = sceneLabels[0]!;
+    let timelineOffset = input.scenes[0]!.seconds;
+    const xfadeNames: Record<string, string> = {
+      dissolve: "dissolve",
+      "wipe-left": "wipeleft",
+      "wipe-right": "wiperight",
+      "match-left": "smoothleft",
+      "match-right": "smoothright",
+    };
+    for (let sceneIndex = 1; sceneIndex < sceneLabels.length; sceneIndex += 1) {
+      const nextLabel = sceneLabels[sceneIndex]!;
+      const transition = scenePlans[sceneIndex - 1]!.transition;
+      const outputLabel = `[timeline_${sceneIndex}]`;
+      if (transition === "cut") {
+        filters.push(`${timelineLabel}${nextLabel}concat=n=2:v=1:a=0,fps=${FPS},format=yuv420p,setsar=1,settb=AVTB,setpts=PTS-STARTPTS${outputLabel}`);
+      } else {
+        const xfade = xfadeNames[transition] ?? "fade";
+        filters.push(`${timelineLabel}${nextLabel}xfade=transition=${xfade}:duration=${TRANSITION_SECONDS.toFixed(5)}:offset=${timelineOffset.toFixed(5)}${outputLabel}`);
+      }
+      timelineLabel = outputLabel;
+      timelineOffset += input.scenes[sceneIndex]!.seconds;
+    }
     if (subtitlesPath) {
-      filters.push(`[outv]ass=filename='${escapeFilterPath(subtitlesPath)}'[captioned]`);
+      filters.push(`${timelineLabel}ass=filename='${escapeFilterPath(subtitlesPath)}'[captioned]`);
     }
     ffmpegArgs.push(
+      "-filter_complex_threads",
+      "1",
       "-filter_complex",
       filters.join(";"),
       "-map",
-      subtitlesPath ? "[captioned]" : "[outv]",
+      subtitlesPath ? "[captioned]" : timelineLabel,
       "-r",
       String(FPS),
       "-frames:v",

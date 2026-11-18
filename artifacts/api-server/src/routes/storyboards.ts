@@ -17,6 +17,14 @@ const cartoonStyleGuides: Record<string, string> = {
   B9: "A lively street-scene cartoon series led by a host and guest, with at least one recurring side character. Use city storefronts, interview gestures, clear reactions, expressive poses, and short animated-text-ready emphasis lines.",
 };
 const MULTI_CHARACTER_STYLES = new Set(Object.keys(cartoonStyleGuides));
+const sceneEntrances = ["already-on-stage", "walk-in-left", "walk-in-right", "run-in-left", "run-in-right", "pop-in"] as const;
+const sceneGroupActions = ["story-directed", "talk-and-react", "walk-together", "point-together", "celebrate-together"] as const;
+const sceneExits = ["hold", "walk-off-left", "walk-off-right", "run-off-left", "run-off-right", "exit-together"] as const;
+const sceneTransitions = ["cut", "dissolve", "wipe-left", "wipe-right", "match-left", "match-right"] as const;
+
+function pickOption<T extends string>(value: unknown, options: readonly T[], fallback: T): T {
+  return typeof value === "string" && options.includes(value as T) ? (value as T) : fallback;
+}
 
 function takeGenerationSlot(userId: string): boolean {
   const now = Date.now();
@@ -41,7 +49,7 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
     return;
   }
 
-  const { topic, sourceScript, styleId, aspectRatio, durationSeconds, contentLanguage } = parsed.data;
+  const { topic, sourceScript, styleId, aspectRatio, durationSeconds, contentLanguage, cartoonCast } = parsed.data;
   const desiredScenes = Math.max(4, Math.min(8, Math.ceil(durationSeconds / 80)));
   const targetNarrationWords = Math.round(durationSeconds * 2.1);
   const wordsPerScene = Math.ceil(targetNarrationWords / desiredScenes);
@@ -52,7 +60,11 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
     aspectRatio,
     targetDurationSeconds: durationSeconds,
     contentLanguage,
+    cartoonCast: MULTI_CHARACTER_STYLES.has(styleId) ? cartoonCast ?? [] : [],
   });
+  const castDirection = MULTI_CHARACTER_STYLES.has(styleId) && cartoonCast?.length
+    ? `Use these exact recurring characters throughout the storyboard: ${cartoonCast.map((member) => `${member.name} (${member.role}${member.personality ? `; ${member.personality}` : ""})`).join(", ")}. Preserve their identities and relationships in every scene.`
+    : "";
 
   try {
     const completion = await openai.chat.completions.create({
@@ -68,12 +80,15 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
             languageInstruction(contentLanguage),
             "Write the title, script, hook, takeaway, narration, on-screen text, and every scene field in the selected language. Preserve the source meaning when adapting text from another language.",
             cartoonStyleGuides[styleId] ?? "",
+            castDirection,
             MULTI_CHARACTER_STYLES.has(styleId)
-              ? "Every visualDirection must show at least two characters interacting, and preferably three when the composition allows. Include a specific primary action and a different secondary reaction or gesture in each scene, with recognizable faces, clothing colors, foreground/background placement, and props. Keep the recurring cast identifiable from scene to scene; avoid a single isolated figure or repeated static poses."
+              ? "Every visualDirection must show at least two characters interacting, and preferably three when the composition allows. Include a specific primary action and a different secondary reaction or gesture in each scene, with recognizable faces, clothing colors, foreground/background placement, and props. Keep the recurring cast identifiable from scene to scene; avoid a single isolated figure or repeated static poses. For each scene include entrance (already-on-stage, walk-in-left, walk-in-right, run-in-left, run-in-right, pop-in), groupAction (story-directed, talk-and-react, walk-together, point-together, celebrate-together), exit (hold, walk-off-left, walk-off-right, run-off-left, run-off-right, exit-together), and transitionToNext (cut, dissolve, wipe-left, wipe-right, match-left, match-right). Start the first scene with a clear entrance, carry the same cast into later scenes, and vary the group action to match the narration."
               : "",
             "Return one JSON object with exactly: title, script, hook, takeaway, scenes.",
             `Create exactly ${desiredScenes} scenes with a clear hook, explanation, turn, and memorable takeaway.`,
-            "Each scene must include title, narration, visualDirection, shotType, visualMetaphor, onScreenText, cameraMove, soundCue, and seconds.",
+            MULTI_CHARACTER_STYLES.has(styleId)
+              ? "Each scene must include title, narration, visualDirection, shotType, visualMetaphor, onScreenText, cameraMove, soundCue, seconds, entrance, groupAction, exit, and transitionToNext."
+              : "Each scene must include title, narration, visualDirection, shotType, visualMetaphor, onScreenText, cameraMove, soundCue, and seconds.",
             `Write natural spoken narration at 120–135 words per minute. Aim for about ${targetNarrationWords} narration words total, around ${wordsPerScene} per scene, so speech fills the selected runtime instead of ending early.`,
             "Visual direction must describe an observable action, character expression, environment, and composition. Give each scene narration enough words for its allotted screen time.",
             "Match the requested aspect ratio and style. Avoid copyrighted characters, brand imitation, and unsupported factual claims.",
@@ -126,7 +141,7 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
     const scenes = rawScenes.map((value, index) => {
       const scene = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
       const seconds = Math.min(90, Math.max(1, sceneSeconds + (remainder-- > 0 ? 1 : 0)));
-      return {
+      const baseScene = {
         id: randomUUID(),
         title: typeof scene.title === "string" ? scene.title.slice(0, 100) : `${localizedFallback.scene} ${index + 1}`,
         narration: typeof scene.narration === "string" ? scene.narration.slice(0, 1200) : "",
@@ -144,6 +159,17 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
           typeof scene.cameraMove === "string" ? scene.cameraMove.slice(0, 160) : localizedFallback.camera,
         soundCue: typeof scene.soundCue === "string" ? scene.soundCue.slice(0, 160) : "",
       };
+      return MULTI_CHARACTER_STYLES.has(styleId)
+        ? {
+            ...baseScene,
+            entrance: pickOption(scene.entrance, sceneEntrances, index === 0 ? "walk-in-left" : "already-on-stage"),
+            groupAction: pickOption(scene.groupAction, sceneGroupActions, "story-directed"),
+            exit: pickOption(scene.exit, sceneExits, "hold"),
+            transitionToNext: index === rawScenes.length - 1
+              ? "cut"
+              : pickOption(scene.transitionToNext, sceneTransitions, "match-left"),
+          }
+        : baseScene;
     });
 
     const draft = GenerateStoryboardResponse.parse({

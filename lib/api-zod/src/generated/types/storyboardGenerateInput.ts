@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { CartoonCastMember } from './cartoonCastMember';
 import type { LanguageCode } from './languageCode';
 import type { StoryboardGenerateInputAspectRatio } from './storyboardGenerateInputAspectRatio';
 
@@ -25,4 +26,6 @@ export interface StoryboardGenerateInput {
      */
   durationSeconds: number;
   contentLanguage: LanguageCode;
+  /** @maxItems 5 */
+  cartoonCast?: CartoonCastMember[];
 }

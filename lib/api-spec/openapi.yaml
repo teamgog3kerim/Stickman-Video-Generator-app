@@ -616,6 +616,34 @@ components:
           minLength: 6
           maxLength: 128
       required: [currentPassword, newPassword]
+    CartoonCastMember:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 40
+        role:
+          type: string
+          maxLength: 60
+        personality:
+          type: string
+          maxLength: 120
+        shirtColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        skinTone:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        hairStyle:
+          type: string
+          enum: [short, curly, long]
+        accessory:
+          type: string
+          enum: [none, cap, glasses, headband, backpack, bow]
+      required: [id, name, role, shirtColor, skinTone, hairStyle, accessory]
     Scene:
       type: object
       properties:
@@ -641,6 +669,18 @@ components:
           type: string
         soundCue:
           type: string
+        entrance:
+          type: string
+          enum: [already-on-stage, walk-in-left, walk-in-right, run-in-left, run-in-right, pop-in]
+        groupAction:
+          type: string
+          enum: [story-directed, talk-and-react, walk-together, point-together, celebrate-together]
+        exit:
+          type: string
+          enum: [hold, walk-off-left, walk-off-right, run-off-left, run-off-right, exit-together]
+        transitionToNext:
+          type: string
+          enum: [cut, dissolve, wipe-left, wipe-right, match-left, match-right]
       required: [id, title, narration, visualDirection, seconds]
     ProjectInput:
       type: object
@@ -686,6 +726,11 @@ components:
           maxItems: 40
           items:
             $ref: "#/components/schemas/Scene"
+        cartoonCast:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/CartoonCastMember"
       required:
         - title
         - topic
@@ -741,6 +786,11 @@ components:
           maximum: 600
         contentLanguage:
           $ref: "#/components/schemas/LanguageCode"
+        cartoonCast:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/CartoonCastMember"
       required: [topic, styleId, aspectRatio, durationSeconds, contentLanguage]
     StoryboardDraft:
       type: object

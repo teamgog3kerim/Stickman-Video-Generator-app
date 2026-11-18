@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { CartoonCastMember } from './cartoonCastMember';
 import type { LanguageCode } from './languageCode';
 import type { ProjectInputAspectRatio } from './projectInputAspectRatio';
 import type { ProjectInputEngine } from './projectInputEngine';
@@ -36,4 +37,6 @@ export interface ProjectInput {
   contentLanguage: LanguageCode;
   /** @maxItems 40 */
   scenes: Scene[];
+  /** @maxItems 5 */
+  cartoonCast?: CartoonCastMember[];
 }

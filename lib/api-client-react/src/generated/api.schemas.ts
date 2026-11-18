@@ -94,6 +94,91 @@ export interface PasswordChangeInput {
   newPassword: string;
 }
 
+export type CartoonCastMemberHairStyle = typeof CartoonCastMemberHairStyle[keyof typeof CartoonCastMemberHairStyle];
+
+
+export const CartoonCastMemberHairStyle = {
+  short: 'short',
+  curly: 'curly',
+  long: 'long',
+} as const;
+
+export type CartoonCastMemberAccessory = typeof CartoonCastMemberAccessory[keyof typeof CartoonCastMemberAccessory];
+
+
+export const CartoonCastMemberAccessory = {
+  none: 'none',
+  cap: 'cap',
+  glasses: 'glasses',
+  headband: 'headband',
+  backpack: 'backpack',
+  bow: 'bow',
+} as const;
+
+export interface CartoonCastMember {
+  /** @maxLength 64 */
+  id: string;
+  /** @maxLength 40 */
+  name: string;
+  /** @maxLength 60 */
+  role: string;
+  /** @maxLength 120 */
+  personality?: string;
+  /** @pattern ^#[0-9A-Fa-f]{6}$ */
+  shirtColor: string;
+  /** @pattern ^#[0-9A-Fa-f]{6}$ */
+  skinTone: string;
+  hairStyle: CartoonCastMemberHairStyle;
+  accessory: CartoonCastMemberAccessory;
+}
+
+export type SceneEntrance = typeof SceneEntrance[keyof typeof SceneEntrance];
+
+
+export const SceneEntrance = {
+  'already-on-stage': 'already-on-stage',
+  'walk-in-left': 'walk-in-left',
+  'walk-in-right': 'walk-in-right',
+  'run-in-left': 'run-in-left',
+  'run-in-right': 'run-in-right',
+  'pop-in': 'pop-in',
+} as const;
+
+export type SceneGroupAction = typeof SceneGroupAction[keyof typeof SceneGroupAction];
+
+
+export const SceneGroupAction = {
+  'story-directed': 'story-directed',
+  'talk-and-react': 'talk-and-react',
+  'walk-together': 'walk-together',
+  'point-together': 'point-together',
+  'celebrate-together': 'celebrate-together',
+} as const;
+
+export type SceneExit = typeof SceneExit[keyof typeof SceneExit];
+
+
+export const SceneExit = {
+  hold: 'hold',
+  'walk-off-left': 'walk-off-left',
+  'walk-off-right': 'walk-off-right',
+  'run-off-left': 'run-off-left',
+  'run-off-right': 'run-off-right',
+  'exit-together': 'exit-together',
+} as const;
+
+export type SceneTransitionToNext = typeof SceneTransitionToNext[keyof typeof SceneTransitionToNext];
+
+
+export const SceneTransitionToNext = {
+  cut: 'cut',
+  dissolve: 'dissolve',
+  'wipe-left': 'wipe-left',
+  'wipe-right': 'wipe-right',
+  'match-left': 'match-left',
+  'match-right': 'match-right',
+} as const;
+
 export interface Scene {
   id: string;
   title: string;
@@ -109,6 +194,10 @@ export interface Scene {
   onScreenText?: string;
   cameraMove?: string;
   soundCue?: string;
+  entrance?: SceneEntrance;
+  groupAction?: SceneGroupAction;
+  exit?: SceneExit;
+  transitionToNext?: SceneTransitionToNext;
 }
 
 export type ProjectInputEngine = typeof ProjectInputEngine[keyof typeof ProjectInputEngine];
@@ -153,6 +242,8 @@ export interface ProjectInput {
   contentLanguage: LanguageCode;
   /** @maxItems 40 */
   scenes: Scene[];
+  /** @maxItems 5 */
+  cartoonCast?: CartoonCastMember[];
 }
 
 export type Project = ProjectInput & ({
@@ -188,6 +279,8 @@ export interface StoryboardGenerateInput {
      */
   durationSeconds: number;
   contentLanguage: LanguageCode;
+  /** @maxItems 5 */
+  cartoonCast?: CartoonCastMember[];
 }
 
 export interface StoryboardDraft {

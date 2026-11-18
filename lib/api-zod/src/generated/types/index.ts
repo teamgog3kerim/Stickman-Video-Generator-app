@@ -7,6 +7,9 @@
  */
 
 export * from './adminUser';
+export * from './cartoonCastMember';
+export * from './cartoonCastMemberAccessory';
+export * from './cartoonCastMemberHairStyle';
 export * from './downloadedVideo';
 export * from './downloadedVideoAspectRatio';
 export * from './errorResponse';
@@ -19,6 +22,10 @@ export * from './projectInput';
 export * from './projectInputAspectRatio';
 export * from './projectInputEngine';
 export * from './scene';
+export * from './sceneEntrance';
+export * from './sceneExit';
+export * from './sceneGroupAction';
+export * from './sceneTransitionToNext';
 export * from './sessionUser';
 export * from './signUpInput';
 export * from './socialProviderStatus';

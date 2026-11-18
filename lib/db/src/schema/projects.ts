@@ -14,6 +14,21 @@ export type ProjectScene = {
   onScreenText?: string;
   cameraMove?: string;
   soundCue?: string;
+  entrance?: "already-on-stage" | "walk-in-left" | "walk-in-right" | "run-in-left" | "run-in-right" | "pop-in";
+  groupAction?: "story-directed" | "talk-and-react" | "walk-together" | "point-together" | "celebrate-together";
+  exit?: "hold" | "walk-off-left" | "walk-off-right" | "run-off-left" | "run-off-right" | "exit-together";
+  transitionToNext?: "cut" | "dissolve" | "wipe-left" | "wipe-right" | "match-left" | "match-right";
+};
+
+export type ProjectCastMember = {
+  id: string;
+  name: string;
+  role: string;
+  personality?: string;
+  shirtColor: string;
+  skinTone: string;
+  hairStyle: "short" | "curly" | "long";
+  accessory: "none" | "cap" | "glasses" | "headband" | "backpack" | "bow";
 };
 
 export const projectsTable = pgTable(
@@ -37,6 +52,7 @@ export const projectsTable = pgTable(
     soundEffects: boolean("sound_effects").notNull().default(false),
     contentLanguage: text("content_language").$type<"en" | "am" | "ar">().notNull().default("en"),
     scenes: jsonb("scenes").$type<ProjectScene[]>().notNull().default([]),
+    cartoonCast: jsonb("cartoon_cast").$type<ProjectCastMember[]>().notNull().default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true })

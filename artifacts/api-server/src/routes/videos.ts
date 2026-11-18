@@ -339,6 +339,7 @@ router.post("/videos/render", async (req, res): Promise<void> => {
       subtitles: project.subtitles,
       contentLanguage: project.contentLanguage,
       scenes: project.scenes,
+      cartoonCast: project.cartoonCast,
     });
     const videoId = randomUUID();
     const objectPath = renderedVideoObjectPath(req.authUser!.id, videoId);

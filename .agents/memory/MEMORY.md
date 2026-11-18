@@ -1,2 +1,3 @@
 - [OAuth restriction](no-oauth-scope.md) — The user asked for no OAuth anywhere in this app; social sharing should stay guided/manual.
 - [EthioDeploy secret flags](ethiodeploy-secret-flags.md) — Verify the installed CLI's `env set --help`; this workspace's CLI rejected the documented `--runtime-only` flag.
+- [FFmpeg scene transitions](ffmpeg-scene-transitions.md) — Keep xfade inputs finite and append explicit hold frames; tpad did not reliably finish animated scene streams.

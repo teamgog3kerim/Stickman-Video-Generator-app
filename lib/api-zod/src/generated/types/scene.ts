@@ -5,6 +5,10 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { SceneEntrance } from './sceneEntrance';
+import type { SceneExit } from './sceneExit';
+import type { SceneGroupAction } from './sceneGroupAction';
+import type { SceneTransitionToNext } from './sceneTransitionToNext';
 
 export interface Scene {
   id: string;
@@ -21,4 +25,8 @@ export interface Scene {
   onScreenText?: string;
   cameraMove?: string;
   soundCue?: string;
+  entrance?: SceneEntrance;
+  groupAction?: SceneGroupAction;
+  exit?: SceneExit;
+  transitionToNext?: SceneTransitionToNext;
 }

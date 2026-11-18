@@ -136,3 +136,40 @@ html[lang="am-ET"] .display,html[lang="ar"] .display{font-family:inherit;font-we
   .language-switcher select{max-width:90px;font-size:10px}
   .language-preference-grid{grid-template-columns:1fr}
 }
+.cartoon-cast-panel{margin-top:12px}
+.cast-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.cast-panel-heading h2{margin:2px 0 4px;color:#3d4948;font:600 16px 'Space Grotesk';letter-spacing:-.025em}
+.cast-panel-heading p{margin:0;color:#8e9188;font-size:9px;line-height:1.55}
+.cast-count{flex:none;padding:6px 8px;border:1px solid #e7e1d6;border-radius:20px;background:#f6f3eb;color:#899086;font-size:8px}
+.cast-member-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:9px}
+.cast-member-card{min-width:0;padding:10px;border:1px solid #e5dfd3;border-radius:8px;background:#fffdf8}
+.cast-member-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;color:#68736c;font:8px 'DM Mono';letter-spacing:.07em}
+.cast-member-heading>span{display:flex;align-items:center;gap:7px}
+.cast-member-heading i{width:10px;height:10px;border:1px solid #3d494833;border-radius:50%;box-shadow:0 0 0 3px #f3f0e8}
+.cast-remove{display:grid;place-items:center;width:25px;height:25px;border:0;border-radius:5px;background:transparent;color:#9b9285;cursor:pointer}
+.cast-remove:hover{background:#f7e9e3;color:#a94f39}
+.cast-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cast-field-grid label{display:grid;min-width:0;gap:4px;color:#8c8b80;font:8px 'DM Mono';letter-spacing:.04em}
+.cast-field-grid .cast-personality{grid-column:1/-1}
+.cast-field-grid input:not([type=color]),.cast-field-grid select{height:30px;min-width:0;width:100%;padding:0 7px;border:1px solid #e2ddd2;border-radius:5px;background:#f9f7f0;color:#4c5854;font:10px 'DM Sans';outline:none}
+.cast-field-grid input:focus,.cast-field-grid select:focus,.choreography-fields select:focus{border-color:#d98b6c;box-shadow:0 0 0 2px #d98b6818}
+.cast-field-grid input::placeholder{color:#b2ada2}
+.color-input-wrap{display:flex;align-items:center;gap:6px;height:30px;min-width:0;padding:3px 6px;border:1px solid #e2ddd2;border-radius:5px;background:#f9f7f0;direction:ltr}
+.color-input-wrap input[type=color]{width:23px;height:21px;padding:0;border:0;border-radius:4px;background:transparent;cursor:pointer}
+.color-input-wrap input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.color-input-wrap input[type=color]::-webkit-color-swatch{border:1px solid #3d494833;border-radius:3px}
+.color-input-wrap code{overflow:hidden;color:#84877e;font:8px 'DM Mono';text-overflow:ellipsis}
+.cast-add-button{display:flex;align-items:center;gap:7px;margin-top:11px;padding:8px 10px;border:1px dashed #d7d1c5;border-radius:6px;background:transparent;color:#747e75;font-size:9px;cursor:pointer}
+.cast-add-button:hover:not(:disabled){border-color:#d98b6c;background:#fbf5ec;color:#b86d4d}
+.cast-add-button:disabled{opacity:.5;cursor:not-allowed}
+.cast-add-button span{margin-left:auto;color:#a09b8f;font:8px 'DM Mono'}
+.scene-choreography{margin:5px 4px 3px;padding:10px 10px 9px;border:1px solid #e9e4d9;border-radius:7px;background:#f6f3ec}
+.choreography-heading{display:grid;gap:4px;margin:0 0 8px}
+.choreography-heading .field-label{color:#ab7559}
+.choreography-heading small{color:#929187;font-size:8px;line-height:1.45}
+.choreography-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.choreography-fields label{display:grid;min-width:0;gap:4px;color:#8c8b80;font:8px 'DM Mono';letter-spacing:.03em}
+.choreography-fields select{height:30px;min-width:0;width:100%;padding:0 6px;border:1px solid #e2ddd2;border-radius:5px;background:#fffdf8;color:#4c5854;font:9px 'DM Sans';outline:none}
+.app-shell[dir="rtl"] .cast-member-heading,.app-shell[dir="rtl"] .cast-panel-heading,.app-shell[dir="rtl"] .cast-field-grid,.app-shell[dir="rtl"] .choreography-fields{direction:rtl}
+.app-shell[dir="rtl"] .cast-add-button span{margin-left:0;margin-right:auto}
+@media(max-width:680px){.cast-member-grid{grid-template-columns:1fr}.cast-member-card{padding:11px}.choreography-fields{grid-template-columns:1fr}}
