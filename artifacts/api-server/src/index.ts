@@ -1,5 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { migrateDatabase } from "@workspace/db/migrate";
+import { assertRenderedVideoStorageConfigured } from "./lib/renderedVideoStorage";
 
 const rawPort = process.env["PORT"];
 
@@ -15,11 +17,20 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
+async function startServer(): Promise<void> {
+  if (process.env.NODE_ENV === "production") {
+    assertRenderedVideoStorageConfigured();
+  }
+  if (process.env.RUN_DB_MIGRATIONS === "true") {
+    await migrateDatabase();
   }
 
-  logger.info({ port }, "Server listening");
+  app.listen(port, "0.0.0.0", () => {
+    logger.info({ port }, "Server listening");
+  });
+}
+
+startServer().catch((err: unknown) => {
+  logger.error({ err }, "Server startup failed");
+  process.exit(1);
 });

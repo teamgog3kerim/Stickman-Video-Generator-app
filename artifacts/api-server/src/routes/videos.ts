@@ -109,8 +109,8 @@ async function streamSavedVideo(
       return;
     }
     if (!objectResponse.ok || !objectResponse.body) {
-      req.log.error({ status: objectResponse.status, videoId: video.id }, "App Storage download request failed");
-      res.status(502).json({ error: "Saved video could not be downloaded." });
+      req.log.error({ status: objectResponse.status, videoId: video.id }, "Object storage download request failed");
+      res.status(502).json({ error: "Saved video could not be downloaded from object storage." });
       return;
     }
 

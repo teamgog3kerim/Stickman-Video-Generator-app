@@ -1,1 +1,2 @@
 - [OAuth restriction](no-oauth-scope.md) — The user asked for no OAuth anywhere in this app; social sharing should stay guided/manual.
+- [EthioDeploy secret flags](ethiodeploy-secret-flags.md) — Verify the installed CLI's `env set --help`; this workspace's CLI rejected the documented `--runtime-only` flag.

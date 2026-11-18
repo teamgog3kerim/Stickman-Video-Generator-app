@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+import path from "node:path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
@@ -33,5 +34,25 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+if (process.env.SERVE_WEB === "true" || process.env.NODE_ENV === "production") {
+  const webRoot = path.resolve(
+    process.cwd(),
+    "artifacts/stickman-director/dist/public",
+  );
+  app.use(express.static(webRoot));
+  app.use((req, res, next) => {
+    if (
+      (req.method === "GET" || req.method === "HEAD") &&
+      !req.path.startsWith("/api")
+    ) {
+      res.sendFile(path.join(webRoot, "index.html"), (error) => {
+        if (error) next(error);
+      });
+      return;
+    }
+    next();
+  });
+}
 
 export default app;
