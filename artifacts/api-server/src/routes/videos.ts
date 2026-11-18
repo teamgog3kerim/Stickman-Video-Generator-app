@@ -34,19 +34,40 @@ router.post("/videos/render", async (req, res): Promise<void> => {
     return;
   }
 
-  const narration = project.scenes
-    .map((scene) => scene.narration.trim())
-    .filter(Boolean)
-    .join("\n\n");
-  if (project.voiceover && !narration) {
+  const narrationTexts = project.scenes.map((scene) => scene.narration.trim());
+  const emptySceneIndex = narrationTexts.findIndex((text) => !text);
+  if (project.voiceover && emptySceneIndex !== -1) {
     res.status(400).json({
-      error: "Add narration to at least one scene or turn voiceover off before rendering.",
+      error: `Add narration to scene ${emptySceneIndex + 1} so the voiceover covers the full video.`,
     });
     return;
   }
-  if (project.voiceover && narration.length > 6000) {
+  const shortScene = project.voiceover
+    ? project.scenes.find((scene) => {
+        const words = scene.narration.trim().split(/\s+/).length;
+        return words < Math.ceil(scene.seconds * 1.45);
+      })
+    : undefined;
+  if (shortScene) {
+    const minimumWords = Math.ceil(shortScene.seconds * 1.45);
     res.status(400).json({
-      error: "Voiceover is limited to 6,000 characters per render. Shorten the narration or turn voiceover off.",
+      error: `Add more narration to “${shortScene.title}”. Its ${shortScene.seconds}-second scene needs about ${minimumWords} words or more.`,
+    });
+    return;
+  }
+  const longScene = project.voiceover
+    ? project.scenes.find((scene) => scene.narration.trim().split(/\s+/).length > Math.ceil(scene.seconds * 3.2))
+    : undefined;
+  if (longScene) {
+    res.status(400).json({
+      error: `Shorten the narration for “${longScene.title}” or increase its scene duration.`,
+    });
+    return;
+  }
+  const narration = narrationTexts.join("\n\n");
+  if (project.voiceover && narration.length > 16000) {
+    res.status(400).json({
+      error: "Voiceover is limited to 16,000 characters per render. Shorten the script or turn voiceover off.",
     });
     return;
   }

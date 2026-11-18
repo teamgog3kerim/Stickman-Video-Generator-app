@@ -34,6 +34,8 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
 
   const { topic, sourceScript, styleId, aspectRatio, durationSeconds } = parsed.data;
   const desiredScenes = Math.max(4, Math.min(8, Math.ceil(durationSeconds / 80)));
+  const targetNarrationWords = Math.round(durationSeconds * 2.1);
+  const wordsPerScene = Math.ceil(targetNarrationWords / desiredScenes);
   const userMaterial = JSON.stringify({
     topic,
     sourceScript: sourceScript ?? "",
@@ -56,7 +58,8 @@ router.post("/storyboards/generate", requireAuth, async (req, res): Promise<void
             "Return one JSON object with exactly: title, script, hook, takeaway, scenes.",
             `Create exactly ${desiredScenes} scenes with a clear hook, explanation, turn, and memorable takeaway.`,
             "Each scene must include title, narration, visualDirection, shotType, visualMetaphor, onScreenText, cameraMove, soundCue, and seconds.",
-            "Write concise narration that sounds natural when spoken. Visual direction must describe an observable action and composition.",
+            `Write natural spoken narration at 120–135 words per minute. Aim for about ${targetNarrationWords} narration words total, around ${wordsPerScene} per scene, so speech fills the selected runtime instead of ending early.`,
+            "Visual direction must describe an observable action and composition. Give each scene narration enough words for its allotted screen time.",
             "Match the requested aspect ratio and style. Avoid copyrighted characters, brand imitation, and unsupported factual claims.",
             "Make the scene durations add up to the target duration. Keep each scene between 1 and 90 seconds.",
             "Do not include markdown or code fences.",
