@@ -1,7 +1,8 @@
 import { spawn } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { textToSpeech } from "@workspace/integrations-openai-ai-server/audio";
 import { batchProcess } from "@workspace/integrations-openai-ai-server/batch";
 import { buildVoiceoverSubtitles } from "./videoSubtitles";
@@ -65,15 +66,16 @@ const STYLE_PALETTES: Record<string, { paper: string; ink: string; accent: strin
   B7: { paper: "#263747", ink: "#e7f4d5", accent: "#f38b59", field: "#3e6470" },
   B8: { paper: "#f8e8d2", ink: "#39463e", accent: "#d87858", field: "#9bbc8a" },
   B9: { paper: "#d8edf1", ink: "#3d4c4d", accent: "#e66f52", field: "#b5c9bd" },
+  B10: { paper: "#fff0d4", ink: "#20292d", accent: "#ec994d", field: "#4e7477" },
 };
-const CARTOON_STYLE_IDS = new Set(["A8", "A9", "A10", "B8", "B9"]);
+const CARTOON_STYLE_IDS = new Set(["A8", "A9", "A10", "B8", "B9", "B10"]);
 const FPS = 24;
 const POSE_FRAMES = 24;
 const MOVEMENT_FRAMES = 8;
 const TRANSITION_FRAMES = 8;
 const TRANSITION_SECONDS = TRANSITION_FRAMES / FPS;
 
-type SceneContext = "nature" | "finance" | "technology" | "science" | "health" | "learning" | "food" | "city" | "classroom" | "mall" | "home" | "office" | "park" | "studio";
+type SceneContext = "nature" | "finance" | "technology" | "science" | "health" | "learning" | "food" | "city" | "cave" | "classroom" | "mall" | "home" | "office" | "park" | "studio";
 type StickmanAction = "walk" | "run" | "wave" | "think" | "celebrate" | "lift" | "present";
 
 function escapeXml(value: string): string {
@@ -87,6 +89,16 @@ function escapeXml(value: string): string {
 
 function safeHex(value: string, fallback: string): string {
   return /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+}
+
+function adjustHex(value: string, amount: number): string {
+  const hex = safeHex(value, "#808080").slice(1);
+  const channels = [0, 2, 4].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16));
+  const adjusted = channels
+    .map((channel) => Math.round(amount >= 0 ? channel + (255 - channel) * amount : channel * (1 + amount)))
+    .map((channel) => channel.toString(16).padStart(2, "0"))
+    .join("");
+  return `#${adjusted}`;
 }
 
 function wrapText(value: string, maxChars: number, maxLines: number): string[] {
@@ -115,6 +127,7 @@ function contextForScene(scene: RenderScene, topic: string, styleId: string): Sc
   const classify = (text: string): SceneContext | null => {
     const value = text.toLowerCase();
     const has = (terms: string[]) => terms.some((term) => value.includes(term));
+    if (/\b(cave|caves|cavern|underground|spelunk(?:ing)?|rock formation)\b/.test(value) || has(["ዋሻ", "ዋሻዎች", "የድንጋይ ዋሻ", "ከመሬት በታች", "كهف", "كهوف", "مغارة", "تحت الأرض"])) return "cave";
     if (/\b(classroom|teacher|student|school|chalkboard|lesson)\b/.test(value) || has(["ትምህርት ቤት", "ተማሪ", "መምህር", "ጥቁር ሰሌዳ", "ክፍል", "مدرسة", "معلم", "طالب", "سبورة", "درس"])) return "classroom";
     if (/\b(mall|shopping|shop|store|food court|marketplace)\b/.test(value) || has(["የገበያ ማዕከል", "ሱቅ", "ግብይት", "የምግብ ማዕከል", "مركز تجاري", "متجر", "تسوق", "سوق تجاري", "مطاعم"])) return "mall";
     if (/\b(home|house|family|living room|kitchen|bedroom)\b/.test(value) || has(["ቤት", "ቤተሰብ", "ሳሎን", "መኝታ ቤት", "منزل", "بيت", "عائلة", "أسرة", "غرفة المعيشة", "مطبخ"])) return "home";
@@ -133,7 +146,26 @@ function contextForScene(scene: RenderScene, topic: string, styleId: string): Sc
   const sceneText = `${scene.title} ${scene.narration} ${scene.visualDirection} ${scene.visualMetaphor ?? ""}`;
   if (styleId === "A8") return "classroom";
   if (styleId === "B9") return "city";
-  return classify(sceneText) ?? classify(topic) ?? (styleId === "A9" ? "home" : styleId === "B8" ? "park" : "studio");
+  return classify(sceneText) ?? classify(topic) ?? (styleId === "A9" ? "home" : styleId === "B8" ? "park" : styleId === "B10" ? "city" : "studio");
+}
+
+const CINEMATIC_BACKGROUND_FILES: Partial<Record<SceneContext, readonly string[]>> = {
+  city: ["urban-aerial-01.jpg", "urban-aerial-02.jpg", "urban-aerial-03.jpg", "urban-aerial-04.jpg"],
+  cave: ["cave-01.jpg", "cave-02.jpg", "cave-03.jpg", "cave-04.jpg", "cave-05.jpg", "cave-06.jpg"],
+};
+
+async function photoBackgroundForScene(scene: RenderScene, index: number, input: RenderInput): Promise<string | undefined> {
+  if (input.styleId !== "B10") return undefined;
+  const files = CINEMATIC_BACKGROUND_FILES[contextForScene(scene, input.topic, input.styleId)];
+  if (!files?.length) return undefined;
+  const filename = files[index % files.length]!;
+  const assetPath = join(dirname(fileURLToPath(import.meta.url)), "assets", "cinematic", filename);
+  try {
+    const image = await readFile(assetPath);
+    return `data:image/jpeg;base64,${image.toString("base64")}`;
+  } catch (error) {
+    throw new Error(`Cinematic background "${filename}" is unavailable: ${error instanceof Error ? error.message : "unknown file error"}`);
+  }
 }
 
 function actionForScene(scene: RenderScene): StickmanAction {
@@ -181,6 +213,8 @@ function sceneEnvironment(
       return `<g ${line}><ellipse cx="${width * .73}" cy="${horizon - 35}" rx="136" ry="53" fill="${paper}" stroke="${ink}" stroke-width="8"/><ellipse cx="${width * .73}" cy="${horizon - 41}" rx="92" ry="29" stroke="${accent}" stroke-width="7"/><circle cx="${width * .69}" cy="${horizon - 42}" r="15" fill="${accent}" stroke="${accent}"/><circle cx="${width * .78}" cy="${horizon - 46}" r="13" fill="${palette.field}" stroke="${ink}"/><path d="M${width * .22} ${horizon - 124} q-21 -34 0 -61 m42 61 q-21 -34 0 -61" ${line}/></g>`;
     case "city":
       return `<g ${line}><path d="M0 ${horizon + 6} V${horizon - 118} h${width * .13} v124 M${width * .16} ${horizon + 6} V${horizon - 197} h${width * .15} v203 M${width * .35} ${horizon + 6} V${horizon - 144} h${width * .13} v150 M${width * .53} ${horizon + 6} V${horizon - 172} h${width * .12} v178 M${width * .72} ${horizon + 6} V${horizon - 120} h${width * .13} v126 M${width * .9} ${horizon + 6} V${horizon - 188} h${width * .1} v194"/><path d="M0 ${horizon + 14} Q${width * .5} ${horizon - 30} ${width} ${horizon + 12}" stroke="${accent}" stroke-width="9"/></g>`;
+    case "cave":
+      return `<g fill="none" stroke="${ink}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" opacity=".42"><path d="M0 ${horizon + 46} Q${width * .08} ${horizon - 185} ${width * .34} ${horizon - 164} Q${width * .53} ${horizon - 260} ${width * .72} ${horizon - 151} Q${width * .96} ${horizon - 184} ${width} ${horizon + 35}"/><path d="M${width * .12} ${horizon - 88} l34 47 -18 42 M${width * .82} ${horizon - 108} l-29 52 18 43"/></g><path d="M${width * .3} ${height} Q${width * .5} ${horizon + 15} ${width * .72} ${height}" fill="${accent}" opacity=".12"/>`;
     case "classroom":
       return `<g fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><rect x="${width * .07}" y="${horizon - 165}" width="${width * .34}" height="145" rx="8" fill="${palette.field}"/><path d="M${width * .105} ${horizon - 126} h${width * .22} M${width * .105} ${horizon - 89} h${width * .15} M${width * .105} ${horizon - 52} h${width * .19}" stroke="${paper}" stroke-width="7"/><rect x="${width * .68}" y="${horizon - 173}" width="${width * .22}" height="126" rx="5" fill="${paper}"/><path d="M${width * .79} ${horizon - 170} v120 M${width * .68} ${horizon - 110} h${width * .22}" stroke="${palette.field}" stroke-width="6"/><path d="M${width * .43} ${horizon + 34} h${width * .18} m-${width * .15} 0 v52 m${width * .12} -52 v52 M${width * .7} ${horizon + 28} h${width * .17} m-${width * .14} 0 v56 m${width * .12} -56 v56" stroke="${accent}" stroke-width="9"/></g>`;
     case "mall":
@@ -218,6 +252,12 @@ function cartoonCharacter(
 ): string {
   const shirt = safeHex(member.shirtColor, ["#e9784f", "#4b84ae", "#6d9b78"][characterIndex % 3]!);
   const skin = safeHex(member.skinTone, ["#ffd65f", "#fff5e8", "#efbd91"][characterIndex % 3]!);
+  const shirtLight = adjustHex(shirt, .28);
+  const shirtShade = adjustHex(shirt, -.28);
+  const skinLight = adjustHex(skin, .2);
+  const skinShade = adjustHex(skin, -.18);
+  const hairColor = adjustHex(shirt, -.62);
+  const characterId = member.id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32) || `cast-${characterIndex}`;
   const cycle = Math.sin(phase * Math.PI * 2 + characterIndex * 1.7);
   const bounce = action === "react" || action === "celebrate" ? Math.max(0, cycle) * 11 : action === "run" ? Math.abs(cycle) * 7 : cycle * 2;
   const swing = cycle * (action === "run" ? 30 : 19);
@@ -239,14 +279,21 @@ function cartoonCharacter(
   const stride = walking ? swing * .8 : 0;
   const blink = Math.sin(phase * Math.PI * 4 + characterIndex * 2.4) > .97;
   const mouthOpen = (action === "talk" || action === "present" || characterIndex === 0) && Math.sin(phase * Math.PI * 4 + characterIndex) > .15;
-  const mouth = mouthOpen
+  const mouth = action === "react"
+    ? `<ellipse cx="0" cy="-65" rx="7" ry="9" fill="${palette.ink}"/><ellipse cx="0" cy="-62" rx="3" ry="2" fill="${palette.accent}"/>`
+    : mouthOpen
     ? `<ellipse cx="0" cy="-66" rx="7" ry="9" fill="${palette.ink}"/><ellipse cx="0" cy="-63" rx="3" ry="2" fill="${palette.accent}"/>`
     : `<path d="M-10 -68 Q0 -58 10 -68" fill="none" stroke="${palette.ink}" stroke-width="4" stroke-linecap="round"/>`;
+  const brows = action === "react"
+    ? "M-23 -101q8 -7 16 0 M7 -101q8 -7 16 0"
+    : action === "think"
+      ? "M-23 -97q8 -10 16 -5 M7 -102q8 -5 16 3"
+      : "M-22 -99q8 -5 15 0 M8 -99q8 -5 15 0";
   const hair = member.hairStyle === "curly"
-    ? `<path d="M-39 -91 Q-46 -120 -20 -124 Q-5 -142 11 -125 Q36 -130 41 -104 Q45 -91 32 -88Z" fill="${palette.ink}"/><circle cx="-20" cy="-116" r="10" fill="${palette.ink}"/><circle cx="0" cy="-124" r="10" fill="${palette.ink}"/><circle cx="20" cy="-116" r="10" fill="${palette.ink}"/>`
+    ? `<path d="M-39 -91 Q-46 -120 -20 -124 Q-5 -142 11 -125 Q36 -130 41 -104 Q45 -91 32 -88Z" fill="${hairColor}"/><circle cx="-20" cy="-116" r="10" fill="${hairColor}"/><circle cx="0" cy="-124" r="10" fill="${hairColor}"/><circle cx="20" cy="-116" r="10" fill="${hairColor}"/>`
     : member.hairStyle === "long"
-      ? `<path d="M-39 -91 Q-45 -126 -8 -127 Q30 -131 39 -98 L38 -48 Q23 -57 24 -91 Q8 -107 -5 -95 Q-22 -88 -39 -91Z" fill="${palette.ink}"/>`
-      : `<path d="M-35 -91 Q-42 -122 -12 -123 Q8 -137 30 -116 Q42 -104 34 -87 Q17 -99 5 -107 Q-9 -91 -35 -91Z" fill="${palette.ink}"/>`;
+      ? `<path d="M-39 -91 Q-45 -126 -8 -127 Q30 -131 39 -98 L38 -48 Q23 -57 24 -91 Q8 -107 -5 -95 Q-22 -88 -39 -91Z" fill="${hairColor}"/>`
+      : `<path d="M-35 -91 Q-42 -122 -12 -123 Q8 -137 30 -116 Q42 -104 34 -87 Q17 -99 5 -107 Q-9 -91 -35 -91Z" fill="${hairColor}"/>`;
   const backpack = member.accessory === "backpack"
     ? `<rect x="-42" y="-29" width="18" height="49" rx="7" fill="${palette.accent}" stroke="${palette.ink}" stroke-width="4"/><path d="M-40 -17h14" stroke="${palette.paper}" stroke-width="3"/>`
     : "";
@@ -262,34 +309,48 @@ function cartoonCharacter(
   const motionMarks = action === "run" || action === "react"
     ? `<path d="M-71 -31h-20 M-72 -13h-15 M70 -28h20" stroke="${palette.accent}" stroke-width="5" stroke-linecap="round" opacity=".82"/>`
     : "";
+  const bodyLean = action === "run" ? -5 + cycle * 2 : action === "walk" ? cycle * 2 : action === "react" ? cycle * 1.5 : 0;
 
-  return `<g transform="translate(${x + offsetX} ${groundY - bounce}) scale(${scale * popScale})">
+  return `<g transform="translate(${x + offsetX} ${groundY - bounce}) rotate(${bodyLean} 0 -8) scale(${scale * popScale})">
+    <defs>
+      <linearGradient id="shirt-${characterId}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${shirtLight}"/><stop offset=".58" stop-color="${shirt}"/><stop offset="1" stop-color="${shirtShade}"/></linearGradient>
+      <radialGradient id="skin-${characterId}" cx=".28" cy=".22" r=".9"><stop stop-color="${skinLight}"/><stop offset=".72" stop-color="${skin}"/><stop offset="1" stop-color="${skinShade}"/></radialGradient>
+    </defs>
     <ellipse cx="0" cy="8" rx="57" ry="12" fill="${palette.ink}" opacity=".14"/>
     ${motionMarks}
     <path d="M-13 31 L${-21 - stride * .35} 77 L${-35 - stride} 125 L-18 127 L0 80 L15 127 L35 125 L${21 + stride} 77 L13 31Z" fill="${palette.ink}" stroke="${palette.ink}" stroke-width="3" stroke-linejoin="round"/>
     ${backpack}
-    <path d="M-24 -44 Q0 -57 24 -44 L20 30 Q0 42 -20 30Z" fill="${shirt}" stroke="${palette.ink}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-24 -44 Q0 -57 24 -44 L20 30 Q0 42 -20 30Z" fill="url(#shirt-${characterId})" stroke="${palette.ink}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-14 -39 Q0 -25 14 -39 M0 -24 V22 M-17 3h7 M10 3h7" fill="none" stroke="${shirtShade}" stroke-width="3" stroke-linecap="round" opacity=".58"/>
+    <path d="M-12 -42 L0 -27 L12 -42" fill="none" stroke="${palette.paper}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".82"/>
     <path d="M-20 -33 L${leftArm.elbowX} ${leftArm.elbowY} L${leftArm.handX} ${leftArm.handY} M20 -33 L${rightArm.elbowX} ${rightArm.elbowY} L${rightArm.handX} ${rightArm.handY}" fill="none" stroke="${palette.ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M-20 -31 L${leftArm.elbowX} ${leftArm.elbowY} M20 -31 L${rightArm.elbowX} ${rightArm.elbowY}" fill="none" stroke="${shirt}" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="${leftArm.handX}" cy="${leftArm.handY}" r="7" fill="url(#skin-${characterId})" stroke="${palette.ink}" stroke-width="3"/>
+    <circle cx="${rightArm.handX}" cy="${rightArm.handY}" r="7" fill="url(#skin-${characterId})" stroke="${palette.ink}" stroke-width="3"/>
     <path d="M-35 125 q-5 9 15 10 h12 l-1 -8 M35 125 q6 9 -14 10 h-12 l1 -8" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="5" stroke-linejoin="round"/>
-    <circle cx="0" cy="-83" r="39" fill="${skin}" stroke="${palette.ink}" stroke-width="5"/>
+    <path d="M-33 132h21 M33 132H12" stroke="${palette.accent}" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="0" cy="-83" r="39" fill="url(#skin-${characterId})" stroke="${palette.ink}" stroke-width="5"/>
+    <ellipse cx="-12" cy="-104" rx="17" ry="8" fill="#fff" opacity=".19"/>
     ${hair}${headAccessory}
+    <ellipse cx="-22" cy="-72" rx="7" ry="4" fill="${palette.accent}" opacity=".22"/>
+    <ellipse cx="22" cy="-72" rx="7" ry="4" fill="${palette.accent}" opacity=".22"/>
     <ellipse cx="-13" cy="-86" rx="6" ry="${blink ? 1.5 : 8}" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="2.5"/>
     <ellipse cx="13" cy="-86" rx="6" ry="${blink ? 1.5 : 8}" fill="${palette.paper}" stroke="${palette.ink}" stroke-width="2.5"/>
-    ${blink ? "" : `<circle cx="-12" cy="-85" r="2.6" fill="${palette.ink}"/><circle cx="14" cy="-85" r="2.6" fill="${palette.ink}"/>`}
-    <path d="M-22 -99q8 -5 15 0 M8 -99q8 -5 15 0" fill="none" stroke="${palette.ink}" stroke-width="3" stroke-linecap="round"/>
+    ${blink ? "" : `<circle cx="-12" cy="-85" r="3.2" fill="${palette.ink}"/><circle cx="14" cy="-85" r="3.2" fill="${palette.ink}"/><circle cx="-13" cy="-86" r="1.1" fill="#fff"/><circle cx="13" cy="-86" r="1.1" fill="#fff"/>`}
+    <path d="${brows}" fill="none" stroke="${palette.ink}" stroke-width="3" stroke-linecap="round"/>
     ${mouth}
     <path d="M-2 -77l3 5" stroke="${palette.ink}" stroke-width="2" stroke-linecap="round"/>
   </g>`;
 }
 
-function textRows(lines: string[], x: number, y: number, fontSize: number, fill: string, weight: number, input: RenderInput, anchor = "start"): string {
+function textRows(lines: string[], x: number, y: number, fontSize: number, fill: string, weight: number, input: RenderInput, anchor = "start", outline?: string): string {
   const gap = Math.round(fontSize * 1.24);
   const direction = input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : "";
+  const outlineAttributes = outline ? `paint-order="stroke" stroke="${outline}" stroke-width="6" stroke-linejoin="round"` : "";
   return lines
     .map(
       (line, index) =>
-        `<text x="${x}" y="${y + index * gap}" text-anchor="${anchor}" ${direction} fill="${fill}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${fontSize}" font-weight="${weight}">${escapeXml(line)}</text>`,
+        `<text x="${x}" y="${y + index * gap}" text-anchor="${anchor}" ${direction} ${outlineAttributes} fill="${fill}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${fontSize}" font-weight="${weight}">${escapeXml(line)}</text>`,
     )
     .join("");
 }
@@ -326,15 +387,14 @@ function groupActionForCharacter(scene: RenderScene, primaryAction: StickmanActi
   }
 }
 
-function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, phase = 0, stageMotion: StageMotion = {}): string {
+function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, phase = 0, stageMotion: StageMotion = {}, photoBackground?: string): string {
   const portrait = input.aspectRatio === "9:16";
   const width = portrait ? 720 : 1280;
   const height = portrait ? 1280 : 720;
   const palette = STYLE_PALETTES[input.styleId] ?? STYLE_PALETTES.A2!;
   const cartoonSeries = CARTOON_STYLE_IDS.has(input.styleId);
   const scale = portrait ? 1 : 0.72;
-  const sceneWord = input.contentLanguage === "am" ? "ትዕይንት" : input.contentLanguage === "ar" ? "مشهد" : "Scene";
-  const titleLines = wrapText(scene.title || `${sceneWord} ${index + 1}`, portrait ? 21 : 34, 2);
+  const titleLines = wrapText(scene.title.trim() || input.title, portrait ? 21 : 34, 2);
   const calloutLines = wrapText(scene.onScreenText || scene.visualMetaphor || "", portrait ? 29 : 54, 1);
   const titleY = portrait ? 175 : 138;
   const titleSize = portrait ? 48 : 47;
@@ -342,8 +402,6 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const stickX = portrait ? 355 : 855;
   const stickY = portrait ? 800 : 372;
   const propX = portrait ? 585 : 1005;
-  const frameWord = input.contentLanguage === "am" ? "ትዕይንት" : input.contentLanguage === "ar" ? "مشهد" : "FRAME";
-  const frameLabel = `${frameWord} ${String(index + 1).padStart(2, "0")} · ${String(scene.seconds).padStart(2, "0")}s`;
   const textX = input.contentLanguage === "ar" ? width - (portrait ? 50 : 82) : portrait ? 50 : 82;
   const textAnchor = "start";
   const context = contextForScene(scene, input.topic, input.styleId);
@@ -404,7 +462,7 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
   const callout = calloutLines[0]
     ? `<g transform="translate(${width / 2} ${calloutY - 10}) scale(${calloutScale}) translate(${-width / 2} ${-(calloutY - 10)})"><rect x="${portrait ? 54 : 85}" y="${calloutY - 44}" width="${width - (portrait ? 108 : 170)}" height="64" rx="${cartoonSeries ? 15 : 20}" fill="${palette.paper}" opacity=".94" ${cartoonSeries ? `stroke="${palette.ink}" stroke-width="4"` : ""}/><text x="${Math.round(width / 2)}" y="${calloutY}" text-anchor="middle" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 23 : 25}" font-weight="${cartoonSeries ? 900 : 600}" paint-order="stroke" stroke="${palette.paper}" stroke-width="${cartoonSeries ? 2 : 0}">${escapeXml(calloutLines[0])}</text></g>`
     : "";
-  const environment = sceneEnvironment(context, palette, index, width, height, input.contentLanguage);
+  const environment = photoBackground ? "" : sceneEnvironment(context, palette, index, width, height, input.contentLanguage);
   const sceneProp = context === "technology"
     ? `<rect x="-37" y="-48" width="74" height="96" rx="13" fill="${palette.accent}" opacity=".88"/><rect x="-27" y="-37" width="54" height="69" rx="5" fill="${palette.paper}"/><circle cx="0" cy="39" r="4" fill="${palette.paper}"/>`
     : context === "finance"
@@ -419,6 +477,9 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
               ? `<circle cx="0" cy="0" r="30" fill="${palette.paper}" stroke="${palette.accent}" stroke-width="7"/><ellipse cx="0" cy="0" rx="48" ry="16" fill="none" stroke="${palette.ink}" stroke-width="4" transform="rotate(-28)"/><circle cx="31" cy="-21" r="7" fill="${palette.accent}"/>`
                : `<rect x="-38" y="-38" width="76" height="76" rx="21" fill="${palette.accent}" opacity=".88"/><path d="M-18 0 H18 M0 -18 V18" stroke="${palette.paper}" stroke-width="7" stroke-linecap="round"/>`;
   const cartoonCast = cartoonSeries ? castForRender(input) : [];
+  const cartoonScale = input.styleId === "B10"
+    ? (portrait ? .94 : .9) * (cartoonCast.length > 3 ? .82 : 1)
+    : portrait ? .87 : .72;
   const cartoonCharacters = cartoonSeries
     ? cartoonCast.map((member, characterIndex) => {
         const margin = width * (portrait ? .17 : .18);
@@ -433,7 +494,7 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
         return cartoonCharacter(
           x,
           portrait ? 925 : 455,
-          portrait ? .87 : .72,
+          cartoonScale,
           palette,
           phase,
           characterAction,
@@ -453,20 +514,27 @@ function createSceneSvg(scene: RenderScene, index: number, input: RenderInput, p
     <path d="M${6 * orbit} -78 Q${23 * orbit} -65 ${35 * orbit} -82" fill="none" stroke="${palette.accent}" stroke-width="5" stroke-linecap="round"/>
   </g>`;
 
+  const photoLayer = photoBackground
+    ? `<image href="${photoBackground}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/><rect width="${width}" height="${height}" fill="url(#photoTint)"/><rect width="${width}" height="${height}" fill="url(#photoVignette)"/>`
+    : `<rect width="${width}" height="${height}" fill="url(#paper)"/><circle cx="${portrait ? 588 : 1110}" cy="${portrait ? 255 : 170}" r="${sunRadius}" fill="${palette.accent}" opacity=".16"/><path d="M0 ${portrait ? 940 : 510} Q${width * 0.35} ${portrait ? 870 : 455} ${width} ${portrait ? 965 : 545} V${height} H0Z" fill="${palette.field}" opacity=".78"/>`;
+  const titleFill = photoBackground ? "#fff8e8" : palette.ink;
+  const titleOutline = photoBackground ? "#172226" : undefined;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <defs><linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${palette.paper}"/><stop offset="1" stop-color="${palette.field}"/></linearGradient></defs>
-  <rect width="${width}" height="${height}" fill="url(#paper)"/>
-  <circle cx="${portrait ? 588 : 1110}" cy="${portrait ? 255 : 170}" r="${sunRadius}" fill="${palette.accent}" opacity=".16"/>
-  <path d="M0 ${portrait ? 940 : 510} Q${width * 0.35} ${portrait ? 870 : 455} ${width} ${portrait ? 965 : 545} V${height} H0Z" fill="${palette.field}" opacity=".78"/>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${palette.paper}"/><stop offset="1" stop-color="${palette.field}"/></linearGradient>
+    <linearGradient id="photoTint" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#172226" stop-opacity=".48"/><stop offset=".48" stop-color="#172226" stop-opacity=".1"/><stop offset="1" stop-color="#172226" stop-opacity=".45"/></linearGradient>
+    <radialGradient id="photoVignette" cx=".5" cy=".48" r=".72"><stop offset=".5" stop-color="#101719" stop-opacity="0"/><stop offset="1" stop-color="#101719" stop-opacity=".43"/></radialGradient>
+  </defs>
+  ${photoLayer}
   ${environment}
-  <text x="${textX}" y="${portrait ? 83 : 76}" text-anchor="${textAnchor}" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" opacity=".68" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 17 : 16}" font-weight="700" letter-spacing="3">${escapeXml(frameLabel)}</text>
-  ${textRows(titleLines, textX, titleY, titleSize, palette.ink, 700, input, textAnchor)}
+  ${textRows(titleLines, textX, titleY, titleSize, titleFill, 800, input, textAnchor, titleOutline)}
   ${callout}
   ${cartoonCharacters}
   ${cartoonSeries ? "" : `<g transform="translate(${propX} ${portrait ? 795 : 344}) rotate(${propRotation})">
     ${sceneProp}
   </g>`}
-  <text x="${textX}" y="${portrait ? 1220 : 690}" text-anchor="${textAnchor}" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} fill="${palette.ink}" opacity=".55" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 14 : 13}" font-weight="600" letter-spacing="2">${escapeXml(input.title.slice(0, 42).toLocaleUpperCase(input.contentLanguage === "am" ? "am-ET" : input.contentLanguage))}</text>
+  <text x="${textX}" y="${portrait ? 1220 : 690}" text-anchor="${textAnchor}" ${input.contentLanguage === "ar" ? 'direction="rtl" unicode-bidi="plaintext"' : ""} ${titleOutline ? `paint-order="stroke" stroke="${titleOutline}" stroke-width="5" stroke-linejoin="round"` : ""} fill="${titleFill}" opacity="${photoBackground ? ".86" : ".55"}" font-family="${languageFont(input.contentLanguage)}, sans-serif" font-size="${portrait ? 14 : 13}" font-weight="600" letter-spacing="2">${escapeXml(input.title.slice(0, 42).toLocaleUpperCase(input.contentLanguage === "am" ? "am-ET" : input.contentLanguage))}</text>
 </svg>`;
 }
 
@@ -532,6 +600,9 @@ export async function renderStoryboardVideo(input: RenderInput): Promise<{ buffe
 
   try {
     const totalDuration = input.scenes.reduce((total, scene) => total + scene.seconds, 0);
+    const photoBackgrounds = await Promise.all(
+      input.scenes.map((scene, index) => photoBackgroundForScene(scene, index, input)),
+    );
     const voiceoverPaths: string[] = [];
     const voiceoverSpeeds: number[] = [];
     const spokenDurations: number[] = [];
@@ -606,7 +677,7 @@ export async function renderStoryboardVideo(input: RenderInput): Promise<{ buffe
               ? { exitProgress: 1 }
             : {};
         const phase = kind === "idle" ? frame / POSE_FRAMES : kind === "hold" ? 0 : frame / sampleCount;
-        await writeFile(path, createSceneSvg(scene, sceneIndex, input, phase, stageMotion), "utf8");
+        await writeFile(path, createSceneSvg(scene, sceneIndex, input, phase, stageMotion, photoBackgrounds[sceneIndex]), "utf8");
         svgPaths.push(path);
       }
       const pattern = join(directory, `scene-${sceneIndex}-${kind}-%02d.png`);
