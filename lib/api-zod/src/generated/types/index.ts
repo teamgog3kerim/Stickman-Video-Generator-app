@@ -28,6 +28,7 @@ export * from './sceneGroupAction';
 export * from './sceneTransitionToNext';
 export * from './sessionUser';
 export * from './signUpInput';
+export * from './socialProfileUrlInput';
 export * from './socialProviderStatus';
 export * from './socialProviderStatusProvider';
 export * from './socialSharePlatformCopy';

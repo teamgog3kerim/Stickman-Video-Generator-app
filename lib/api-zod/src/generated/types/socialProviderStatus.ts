@@ -14,5 +14,7 @@ export interface SocialProviderStatus {
   connected: boolean;
   /** @nullable */
   accountName: string | null;
+  /** @nullable */
+  profileUrl: string | null;
   note: string;
 }

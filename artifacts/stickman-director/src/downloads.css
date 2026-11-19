@@ -18,6 +18,8 @@
 .download-card-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}
 .download-again{flex:none;padding:8px 10px;font-size:9px;text-decoration:none}
 .view-share-button{flex:none;padding:8px 10px;font-size:9px}
+.delete-video-button{flex:none;width:34px;height:34px;padding:0;color:#a95143;border-color:#e8cfc7;background:#fcf5f1}
+.delete-video-button:hover:not(:disabled){background:#f6e5de;border-color:#dba99a}
 .download-empty-icon{display:grid;place-items:center;width:53px;height:53px;margin-bottom:13px;border:1px solid #ddd3c4;border-radius:10px;background:#f0ede4;color:#7d9383}
 .downloads-empty p{max-width:390px}
 @media(max-width:620px){
@@ -29,9 +31,10 @@
   .download-topic{font-size:8px}
   .download-card-foot{gap:5px;padding-top:7px}
   .download-card-foot>.mono{display:none}
-  .download-card-actions{gap:5px}
+  .download-card-actions{gap:5px;flex-wrap:wrap}
   .download-again{padding:7px 8px;font-size:8px}
   .download-again svg{width:12px;height:12px}
   .view-share-button{padding:7px 8px;font-size:8px}
   .view-share-button svg{width:12px;height:12px}
+  .delete-video-button{width:36px;height:36px;min-height:36px}
 }

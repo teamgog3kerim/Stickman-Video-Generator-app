@@ -3,6 +3,7 @@ import { Readable } from "node:stream";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { and, desc, eq } from "drizzle-orm";
 import {
+  DeleteDownloadedVideoParams,
   DownloadSavedVideoParams,
   GenerateVideoShareCopyParams,
   GenerateVideoShareCopyResponse,
@@ -67,6 +68,50 @@ router.get("/videos/downloads", async (req, res): Promise<void> => {
     .orderBy(desc(renderedVideosTable.createdAt));
 
   res.json(ListDownloadedVideosResponse.parse(videos));
+});
+
+router.delete("/videos/downloads/:id", async (req, res): Promise<void> => {
+  const params = DeleteDownloadedVideoParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "Saved video ID is invalid." });
+    return;
+  }
+
+  const [video] = await db
+    .select({
+      id: renderedVideosTable.id,
+      objectPath: renderedVideosTable.objectPath,
+    })
+    .from(renderedVideosTable)
+    .where(
+      and(
+        eq(renderedVideosTable.id, params.data.id),
+        eq(renderedVideosTable.userId, req.authUser!.id),
+      ),
+    )
+    .limit(1);
+  if (!video) {
+    res.status(404).json({ error: "Saved video not found." });
+    return;
+  }
+
+  try {
+    await removeRenderedVideoObject(video.objectPath);
+  } catch (error) {
+    req.log.error({ err: error, videoId: video.id }, "Saved MP4 could not be deleted from object storage");
+    res.status(502).json({ error: "The MP4 could not be removed from storage. Your library entry was kept." });
+    return;
+  }
+
+  await db
+    .delete(renderedVideosTable)
+    .where(
+      and(
+        eq(renderedVideosTable.id, video.id),
+        eq(renderedVideosTable.userId, req.authUser!.id),
+      ),
+    );
+  res.sendStatus(204);
 });
 
 async function streamSavedVideo(

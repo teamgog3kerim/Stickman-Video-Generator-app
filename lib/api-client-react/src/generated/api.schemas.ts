@@ -358,7 +358,17 @@ export interface SocialProviderStatus {
   connected: boolean;
   /** @nullable */
   accountName: string | null;
+  /** @nullable */
+  profileUrl: string | null;
   note: string;
+}
+
+export interface SocialProfileUrlInput {
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  profileUrl: string | null;
 }
 
 export interface AdminUser {

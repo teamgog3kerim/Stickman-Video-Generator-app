@@ -30,6 +30,7 @@ import type {
   ProjectInput,
   SessionUser,
   SignUpInput,
+  SocialProfileUrlInput,
   SocialProviderStatus,
   StoryboardDraft,
   StoryboardGenerateInput,
@@ -1303,6 +1304,80 @@ export function useListDownloadedVideos<TData = Awaited<ReturnType<typeof listDo
 
 
 
+export const getDeleteDownloadedVideoUrl = (id: string,) => {
+
+
+
+
+  return `/api/videos/downloads/${id}`
+}
+
+/**
+ * @summary Delete a saved MP4 render and its stored file
+ */
+export const deleteDownloadedVideo = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteDownloadedVideoUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteDownloadedVideoMutationKey = () => ['deleteDownloadedVideo'] as const;
+
+export const getDeleteDownloadedVideoMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDownloadedVideo>>, TError,DeleteDownloadedVideoMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDownloadedVideo>>, TError,DeleteDownloadedVideoMutationVariables, TContext> => {
+
+const mutationKey = getDeleteDownloadedVideoMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDownloadedVideo>>, DeleteDownloadedVideoMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteDownloadedVideo(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteDownloadedVideoMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDownloadedVideo>>>
+
+    export type DeleteDownloadedVideoMutationError = ErrorType<ErrorResponse>
+    export type DeleteDownloadedVideoMutationVariables = {id: string}
+
+    /**
+ * @summary Delete a saved MP4 render and its stored file
+ */
+export const useDeleteDownloadedVideo = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDownloadedVideo>>, TError,DeleteDownloadedVideoMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDownloadedVideo>>,
+        TError,
+        DeleteDownloadedVideoMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteDownloadedVideoMutationOptions(options));
+    }
+
 export const getDownloadSavedVideoUrl = (id: string,) => {
 
 
@@ -1607,6 +1682,95 @@ export function useListSocialProviders<TData = Awaited<ReturnType<typeof listSoc
 
 
 
+
+export const getUpdateSocialProviderProfileUrl = (provider: 'youtube' | 'instagram' | 'tiktok',) => {
+
+
+
+
+  return `/api/social/providers/${provider}/profile`
+}
+
+/**
+ * @summary Save or clear a social profile URL for the current account
+ */
+export const updateSocialProviderProfile = async (provider: 'youtube' | 'instagram' | 'tiktok',
+    socialProfileUrlInput: SocialProfileUrlInput, options?: Parameters<typeof customFetch>[1]): Promise<SocialProviderStatus> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SocialProviderStatus>(getUpdateSocialProviderProfileUrl(provider),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(socialProfileUrlInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateSocialProviderProfileMutationKey = () => ['updateSocialProviderProfile'] as const;
+
+export const getUpdateSocialProviderProfileMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSocialProviderProfile>>, TError,UpdateSocialProviderProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSocialProviderProfile>>, TError,UpdateSocialProviderProfileMutationVariables, TContext> => {
+
+const mutationKey = getUpdateSocialProviderProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSocialProviderProfile>>, UpdateSocialProviderProfileMutationVariables> = (props) => {
+          const {provider,data} = props ?? {};
+
+          return  updateSocialProviderProfile(provider,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSocialProviderProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateSocialProviderProfile>>>
+    export type UpdateSocialProviderProfileMutationBody = BodyType<SocialProfileUrlInput>
+    export type UpdateSocialProviderProfileMutationError = ErrorType<ErrorResponse>
+    export type UpdateSocialProviderProfileMutationVariables = {provider: 'youtube' | 'instagram' | 'tiktok';data: BodyType<SocialProfileUrlInput>}
+
+    /**
+ * @summary Save or clear a social profile URL for the current account
+ */
+export const useUpdateSocialProviderProfile = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSocialProviderProfile>>, TError,UpdateSocialProviderProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateSocialProviderProfile>>,
+        TError,
+        UpdateSocialProviderProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateSocialProviderProfileMutationOptions(options));
+    }
 
 export const getListAdminUsersUrl = () => {
 

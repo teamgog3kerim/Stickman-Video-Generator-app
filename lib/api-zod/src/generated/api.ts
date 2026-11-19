@@ -748,6 +748,16 @@ export const ListDownloadedVideosResponse = zod.array(ListDownloadedVideosRespon
 
 
 /**
+ * @summary Delete a saved MP4 render and its stored file
+ */
+export const DeleteDownloadedVideoParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const DeleteDownloadedVideoResponse = zod.void()
+
+
+/**
  * @summary Download a saved MP4 render
  */
 export const DownloadSavedVideoParams = zod.object({
@@ -794,9 +804,36 @@ export const ListSocialProvidersResponseItem = zod.object({
   "configured": zod.boolean(),
   "connected": zod.boolean(),
   "accountName": zod.string().nullable(),
+  "profileUrl": zod.string().nullable(),
   "note": zod.string()
 })
 export const ListSocialProvidersResponse = zod.array(ListSocialProvidersResponseItem)
+
+
+/**
+ * @summary Save or clear a social profile URL for the current account
+ */
+export const UpdateSocialProviderProfileParams = zod.object({
+  "provider": zod.enum(['youtube', 'instagram', 'tiktok'])
+})
+
+export const updateSocialProviderProfileBodyProfileUrlMax = 500;
+
+
+
+export const UpdateSocialProviderProfileBody = zod.object({
+  "profileUrl": zod.string().url().max(updateSocialProviderProfileBodyProfileUrlMax).nullable()
+})
+
+export const UpdateSocialProviderProfileResponse = zod.object({
+  "provider": zod.enum(['youtube', 'instagram', 'tiktok']),
+  "label": zod.string(),
+  "configured": zod.boolean(),
+  "connected": zod.boolean(),
+  "accountName": zod.string().nullable(),
+  "profileUrl": zod.string().nullable(),
+  "note": zod.string()
+})
 
 
 /**

@@ -336,6 +336,33 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DownloadedVideo"
+  /videos/downloads/{id}:
+    delete:
+      operationId: deleteDownloadedVideo
+      tags: [videos]
+      summary: Delete a saved MP4 render and its stored file
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Saved video and stored file deleted
+        "404":
+          description: Saved video not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Stored video file could not be deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /videos/downloads/{id}/file:
     get:
       operationId: downloadSavedVideo
@@ -439,6 +466,37 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SocialProviderStatus"
+  /social/providers/{provider}/profile:
+    patch:
+      operationId: updateSocialProviderProfile
+      tags: [social]
+      summary: Save or clear a social profile URL for the current account
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [youtube, instagram, tiktok]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SocialProfileUrlInput"
+      responses:
+        "200":
+          description: Updated provider status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SocialProviderStatus"
+        "400":
+          description: Invalid profile URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /admin/users:
     get:
       operationId: listAdminUsers
@@ -884,9 +942,19 @@ components:
           type: boolean
         accountName:
           type: ["string", "null"]
+        profileUrl:
+          type: ["string", "null"]
         note:
           type: string
-      required: [provider, label, configured, connected, accountName, note]
+      required: [provider, label, configured, connected, accountName, profileUrl, note]
+    SocialProfileUrlInput:
+      type: object
+      properties:
+        profileUrl:
+          type: ["string", "null"]
+          format: uri
+          maxLength: 500
+      required: [profileUrl]
     AdminUser:
       type: object
       properties:
