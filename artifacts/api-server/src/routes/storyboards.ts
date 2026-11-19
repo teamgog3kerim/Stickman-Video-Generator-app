@@ -15,6 +15,7 @@ const cartoonStyleGuides: Record<string, string> = {
   A10: "A fast reaction-comedy cartoon trio: use at least three recurring characters with distinct personalities, strong facial expressions, comic timing, clear action/reaction exchanges, and brief punchy on-screen emphasis text.",
   B8: "A hand-drawn storybook cartoon ensemble with at least three recurring characters, expressive but gentle movement, illustrated props, and a setting that changes to fit the story. Keep character colors and silhouettes consistent across scenes.",
   B9: "A lively street-scene cartoon series led by a host and guest, with at least one recurring side character. Use city storefronts, interview gestures, clear reactions, expressive poses, and short animated-text-ready emphasis lines.",
+  B10: "A cinematic 2D adventure series with at least three memorable recurring cartoon characters, dimensional cel-shaded faces and clothing, and expressive coordinated movement. When the topic calls for caves or urban travel, place the cast in realistic photographic cave or aerial-city environments. Keep the characters visually consistent, preserve readable contrast, and never add frame numbers or scene-duration labels.",
 };
 const MULTI_CHARACTER_STYLES = new Set(Object.keys(cartoonStyleGuides));
 const sceneEntrances = ["already-on-stage", "walk-in-left", "walk-in-right", "run-in-left", "run-in-right", "pop-in"] as const;

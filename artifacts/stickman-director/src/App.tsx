@@ -39,8 +39,9 @@ const styles: Style[] = [
   {id:'B7',name:'B7 Pixel Theater',engine:'code',image:'b7-pixel.jpg',desc:'Retro pixel scenes with game-like staging.'},
   {id:'B8',name:'B8 Storybook Ensemble',engine:'code',image:'b8-storybook-ensemble.svg',desc:'Hand-drawn storybook settings with a small expressive ensemble.',featureTags:['3 recurring characters','Storybook settings','Gentle motion']},
   {id:'B9',name:'B9 Street-Corner Shorts',engine:'code',image:'b9-street-corner.svg',desc:'Colorful city stories led by a host, guest, and lively side characters.',featureTags:['Host and guest','Urban settings','Animated emphasis text']},
+  {id:'B10',name:'B10 Cinematic 2D Adventures',engine:'code',image:'b10-cinematic-adventure.svg',desc:'A recurring, richly shaded cast moves through your real cave and city reference imagery.',featureTags:['Photographic environments','Recurring 2D cast','Cinematic motion']},
 ];
-const CARTOON_STYLE_IDS = new Set(['A8','A9','A10','B8','B9']);
+const CARTOON_STYLE_IDS = new Set(['A8','A9','A10','B8','B9','B10']);
 const defaultCartoonCast = (): CartoonCastMember[] => [
   {id:'cast-lead',name:'Mika',role:'Lead',personality:'Curious and expressive',shirtColor:'#e9784f',skinTone:'#ffd65f',hairStyle:'short',accessory:'cap'},
   {id:'cast-friend',name:'Lumi',role:'Friend',personality:'Thoughtful and warm',shirtColor:'#4b84ae',skinTone:'#fff5e8',hairStyle:'curly',accessory:'glasses'},
